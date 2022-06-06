@@ -14,12 +14,14 @@ from litex.soc.interconnect.axi import *
 
 from axi_common import *
 
-# AXI Register -------------------------------------------------------------------------------------
+# AXI Register Type --------------------------------------------------------------------------------
 
 class AXIRegisterType:
     BYPASS        = 0
     SIMPLE_BUFFER = 1
     SKID_BUFFER   = 2
+
+# AXI Register -------------------------------------------------------------------------------------
 
 class AXIRegister(Module):
     def __init__(self, platform, s_axi, m_axi,
@@ -91,11 +93,11 @@ class AXIRegister(Module):
             self.logger.info(f"ID Width: {colorer(address_width)}")
 
         # Registers.
-        self.logger.info(f"AW Reg Type: {aw_reg_type }.")
-        self.logger.info(f" W Reg Type: {w_reg_type }.")
-        self.logger.info(f" B Reg Type: {b_reg_type }.")
-        self.logger.info(f"AR Reg Type: {ar_reg_type }.")
-        self.logger.info(f" R Reg Type: {r_reg_type }.")
+        self.logger.info(f"AW Reg Type: {aw_reg_type}.")
+        self.logger.info(f" W Reg Type: {w_reg_type}.")
+        self.logger.info(f" B Reg Type: {b_reg_type}.")
+        self.logger.info(f"AR Reg Type: {ar_reg_type}.")
+        self.logger.info(f" R Reg Type: {r_reg_type}.")
 
         # Module instance.
         # ----------------
