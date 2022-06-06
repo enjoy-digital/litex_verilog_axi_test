@@ -84,6 +84,11 @@ class AXISimSoC(SoCCore):
         m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
         self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
 
+        from axi_dp_ram import AXIDPRAM
+        s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
+        s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
+        self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, depth=1024)
+
 # Build --------------------------------------------------------------------------------------------
 
 def main():
