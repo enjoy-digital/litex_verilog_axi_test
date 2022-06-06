@@ -68,7 +68,7 @@ class AXISimSoC(SoCCore):
         from axi_adapter import AXIAdapter
         s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
         m_axi = AXIInterface(data_width=64, address_width=32, id_width=8)
-        self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
+        #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
         from axi_ram import AXIRAM
         s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
@@ -78,6 +78,11 @@ class AXISimSoC(SoCCore):
         s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
         m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
         self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
+
+        from axi_fifo import AXIFIFO
+        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+        m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+        self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
 
 # Build --------------------------------------------------------------------------------------------
 
