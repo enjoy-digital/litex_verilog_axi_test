@@ -253,6 +253,6 @@ class AXIRegister(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_register.v")
         platform.add_source("verilog-axi/rtl/axi_register_wr.v")
         platform.add_source("verilog-axi/rtl/axi_register_rd.v")
+        platform.add_source("verilog-axi/rtl/axi_register.v")

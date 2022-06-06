@@ -243,6 +243,6 @@ class AXIFIFO(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_fifo.v")
         platform.add_source("verilog-axi/rtl/axi_fifo_wr.v")
         platform.add_source("verilog-axi/rtl/axi_fifo_rd.v")
+        platform.add_source("verilog-axi/rtl/axi_fifo.v")

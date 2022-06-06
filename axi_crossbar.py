@@ -229,9 +229,9 @@ class AXICrossbar(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_crossbar.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar_addr.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar_rd.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar_wr.v")
         platform.add_source("verilog-axi/rtl/arbiter.v")
         platform.add_source("verilog-axi/rtl/priority_encoder.v")
+        platform.add_source("verilog-axi/rtl/axi_crossbar.v")
+        platform.add_source("verilog-axi/rtl/axi_crossbar_wr.v")
+        platform.add_source("verilog-axi/rtl/axi_crossbar_rd.v")
+        platform.add_source("verilog-axi/rtl/axi_crossbar_addr.v")

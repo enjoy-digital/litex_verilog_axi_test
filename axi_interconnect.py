@@ -229,5 +229,5 @@ class AXIInterconnect(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_interconnect.v")
         platform.add_source("verilog-axi/rtl/arbiter.v")
+        platform.add_source("verilog-axi/rtl/axi_interconnect.v")

@@ -204,7 +204,7 @@ class AXIDPRAM(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_dp_ram.v")
-        platform.add_source("verilog-axi/rtl/axi_ram_wr_rd_if.v")
         platform.add_source("verilog-axi/rtl/axi_ram_wr_if.v")
         platform.add_source("verilog-axi/rtl/axi_ram_rd_if.v")
+        platform.add_source("verilog-axi/rtl/axi_ram_wr_rd_if.v")
+        platform.add_source("verilog-axi/rtl/axi_dp_ram.v")
