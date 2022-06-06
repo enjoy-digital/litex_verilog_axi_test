@@ -50,8 +50,6 @@ class AXIAdapter(Module):
                 colorer(len(m_axi.aw.addr)),
                 colorer("the same")))
             raise AXIError()
-
-            raise AXIError()
         else:
             self.logger.info(f"Address Width: {colorer(address_width)}")
 
@@ -70,8 +68,6 @@ class AXIAdapter(Module):
                 colorer(len(s_axi.aw.id)),
                 colorer(len(m_axi.aw.id)),
                 colorer("the same")))
-            raise AXIError()
-
             raise AXIError()
         else:
             self.logger.info(f"ID Width: {colorer(address_width)}")
