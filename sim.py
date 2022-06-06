@@ -74,6 +74,11 @@ class AXISimSoC(SoCCore):
         s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
         self.submodules.axi_ram = AXIRAM(platform, s_axi, depth=1024)
 
+        from axi_register import AXIRegister
+        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+        m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+        self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
+
 # Build --------------------------------------------------------------------------------------------
 
 def main():
