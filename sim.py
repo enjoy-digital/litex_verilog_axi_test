@@ -89,6 +89,11 @@ class AXISimSoC(SoCCore):
         s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
         self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, depth=1024)
 
+        from axi_crossbar import AXICrossbar
+        s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for i in range(2)]
+        m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
+        self.submodules.axi_crossbar = AXICrossbar(platform, s_axis, m_axis)
+
 # Build --------------------------------------------------------------------------------------------
 
 def main():
