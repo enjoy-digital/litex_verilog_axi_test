@@ -18,6 +18,7 @@ from litex.build.sim.verilator import verilator_build_args, verilator_build_argd
 from litex.soc.interconnect.csr import *
 from litex.soc.integration.soc_core import *
 from litex.soc.integration.builder import *
+from litex.soc.interconnect.axi import *
 
 # IOs ----------------------------------------------------------------------------------------------
 
@@ -62,6 +63,12 @@ class AXISimSoC(SoCCore):
         # SoCCore ----------------------------------------------------------------------------------
         SoCCore.__init__(self, platform, clk_freq=sys_clk_freq, uart_name="sim", integrated_rom_size=0x10000)
         self.add_config("NO_DELAYS")
+
+        # AXI Tests --------------------------------------------------------------------------------
+        from axi_adapter import AXIAdapter
+        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+        m_axi = AXIInterface(data_width=64, address_width=32, id_width=8)
+        self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
 # Build --------------------------------------------------------------------------------------------
 
