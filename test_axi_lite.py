@@ -95,6 +95,33 @@ class AXISimSoC(SoCCore):
                 self.submodules += AXIARDebug(s_axi_lite, name="AXIRAM")
                 self.submodules += AXIRDebug( s_axi_lite, name="AXIRAM")
 
+            # Add AXI-Lite DP RAM to SoC.
+            # ---------------------------
+
+            # Test from LiteX BIOS:
+            # mem_list
+            # mem_write <AXIL_DP_RAM_A_BASE> 0x5aa55aa5
+            # mem_read  <AXIL_DP_RAM_B_BASE> 32
+            # mem_write <AXIL_DP_RAM_B_BASE + 4> 0xa55aa55a
+            # mem_read  <AXIL_DP_RAM_A_BASE> 32
+
+            # 1) Create AXI-Lite interfaces and connect them to SoC.
+            s_axi_lite_a = AXILiteInterface(data_width=32, address_width=32)
+            s_axi_lite_b = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axil_dp_ram_a", s_axi_lite_a, region=SoCRegion(size=0x1000))
+            self.bus.add_slave("axil_dp_ram_b", s_axi_lite_b, region=SoCRegion(size=0x1000))
+            # 2) Add AXILiteDPRAM.
+            from verilog_axi.axi_lite.axil_dp_ram import AXILiteDPRAM
+            self.submodules += AXILiteDPRAM(platform, s_axi_lite_a, s_axi_lite_b, size=0x1000)
+            if 0:
+                self.submodules += AXIAWDebug(s_axi_lite_a, name="AXILiteDPRAM_A")
+                self.submodules += AXIWDebug( s_axi_lite_a, name="AXILiteDPRAM_A")
+                self.submodules += AXIARDebug(s_axi_lite_a, name="AXILiteDPRAM_A")
+                self.submodules += AXIRDebug( s_axi_lite_a, name="AXILiteDPRAM_A")
+                self.submodules += AXIAWDebug(s_axi_lite_b, name="AXILiteDPRAM_B")
+                self.submodules += AXIWDebug( s_axi_lite_b, name="AXILiteDPRAM_B")
+                self.submodules += AXIARDebug(s_axi_lite_b, name="AXILiteDPRAM_B")
+                self.submodules += AXIRDebug( s_axi_lite_b, name="AXILiteDPRAM_B")
 
         axi_lite_syntax_test()
         axi_lite_integration_test()
