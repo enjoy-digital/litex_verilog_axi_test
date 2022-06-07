@@ -85,7 +85,7 @@ class AXIDPRAM(Module):
             # -----------
             # Global.
             p_DATA_WIDTH = data_width,
-            p_ADDR_WIDTH = 2**math.ceil(math.log2(size)),
+            p_ADDR_WIDTH = math.ceil(math.log2(size)),
             p_STRB_WIDTH = data_width//8,
             p_ID_WIDTH   = id_width,
 

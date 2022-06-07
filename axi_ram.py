@@ -49,7 +49,7 @@ class AXIRAM(Module):
             # Parameters.
             # -----------
             p_DATA_WIDTH      = data_width,
-            p_ADDR_WIDTH      = 2**math.ceil(math.log2(size)),
+            p_ADDR_WIDTH      = math.ceil(math.log2(size)),
             p_ID_WIDTH        = id_width,
             p_PIPELINE_OUTPUT = pipeline_output,
 
