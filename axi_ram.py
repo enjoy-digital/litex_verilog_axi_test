@@ -6,7 +6,7 @@
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_ram.v.
 
-import argparse
+import math
 
 from migen import *
 
@@ -17,7 +17,7 @@ from axi_common import *
 # AXI RAM ------------------------------------------------------------------------------------------
 
 class AXIRAM(Module):
-    def __init__(self, platform, s_axi, depth=1024, pipeline_output=False):
+    def __init__(self, platform, s_axi, size=1024, pipeline_output=False):
         self.logger = logging.getLogger("AXIRAM")
 
         # Get/Check Parameters.
@@ -36,7 +36,7 @@ class AXIRAM(Module):
         self.logger.info(f"Data Width: {colorer(data_width)}")
 
         # Depth.
-        self.logger.info(f"Depth: {colorer(depth)}bytes")
+        self.logger.info(f"Size: {colorer(size)}bytes")
 
         # ID width.
         id_width = len(s_axi.aw.id)
@@ -49,7 +49,7 @@ class AXIRAM(Module):
             # Parameters.
             # -----------
             p_DATA_WIDTH      = data_width,
-            p_ADDR_WIDTH      = depth,
+            p_ADDR_WIDTH      = 2**math.ceil(math.log2(size)),
             p_ID_WIDTH        = id_width,
             p_PIPELINE_OUTPUT = pipeline_output,
 

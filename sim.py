@@ -74,7 +74,7 @@ class AXISimSoC(SoCCore):
 
             from axi_ram import AXIRAM
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules.axi_ram = AXIRAM(platform, s_axi, depth=1024)
+            self.submodules.axi_ram = AXIRAM(platform, s_axi, size=0x1000)
 
             from axi_register import AXIRegister
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
@@ -89,7 +89,7 @@ class AXISimSoC(SoCCore):
             from axi_dp_ram import AXIDPRAM
             s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
             s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, depth=1024)
+            self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
 
             from axi_crossbar import AXICrossbar
             s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
@@ -112,7 +112,7 @@ class AXISimSoC(SoCCore):
             self.submodules += AXILite2AXI(s_axi_lite, s_axi)
             # 3) Add AXISRAM.
             from axi_ram import AXIRAM
-            self.submodules += AXIRAM(platform, s_axi, depth=0x1000)
+            self.submodules += AXIRAM(platform, s_axi, size=0x1000)
 
         #axi_syntax_test()
         axi_integration_test()

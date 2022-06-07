@@ -6,8 +6,6 @@
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_fifo.v.
 
-import argparse
-
 from migen import *
 
 from litex.soc.interconnect.axi import *

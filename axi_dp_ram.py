@@ -7,7 +7,6 @@
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_dp_ram.v.
 
 import math
-import argparse
 
 from migen import *
 
@@ -18,7 +17,7 @@ from axi_common import *
 # AXI DP RAM ---------------------------------------------------------------------------------------
 
 class AXIDPRAM(Module):
-    def __init__(self, platform, s_axi_a, s_axi_b, depth=1024,
+    def __init__(self, platform, s_axi_a, s_axi_b, size=0x1000,
         a_pipeline_output = False,
         a_interleave      = False,
         b_pipeline_output = False,
@@ -86,7 +85,7 @@ class AXIDPRAM(Module):
             # -----------
             # Global.
             p_DATA_WIDTH = data_width,
-            p_ADDR_WIDTH = 2**math.ceil(math.log2(depth)),
+            p_ADDR_WIDTH = 2**math.ceil(math.log2(size)),
             p_STRB_WIDTH = data_width//8,
             p_ID_WIDTH   = id_width,
 
