@@ -1,3 +1,0 @@
-[submodule "verilog-axi"]
-	path = verilog_axi/rtl
-	url = https://github.com/alexforencich/verilog-axi
