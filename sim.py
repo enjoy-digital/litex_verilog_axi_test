@@ -161,6 +161,46 @@ class AXISimSoC(SoCCore):
                 self.submodules += AXIARDebug(s_axi_b, name="AXIDPRAM_B")
                 self.submodules += AXIRDebug(s_axi_b,  name="AXIDPRAM_B")
 
+
+            # Add AXI RAM to SoC (Through AXI Register).
+            # -----------------------------------------
+
+            # Test from LiteX BIOS similar to AXI RAM but with AXI_RAM_REG_BASE.
+
+            # 1) Create AXI-Lite interface and connect it to SoC.
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axi_ram_reg", s_axi_lite, region=SoCRegion(size=0x1000))
+            # 2) Convert AXI-Lite interface to AXI interface.
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
+            # 3) Add AXIRegister.
+            from axi_register import AXIRegister
+            s_axi_reg = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules += AXIRegister(platform, s_axi, s_axi_reg)
+            # 4) Add AXISRAM.
+            from axi_ram import AXIRAM
+            self.submodules += AXIRAM(platform, s_axi_reg, size=0x1000)
+
+
+            # Add AXI RAM to SoC (Through AXI FIFO).
+            # -----------------------------------------
+
+            # Test from LiteX BIOS similar to AXI RAM but with AXI_RAM_FIFO_BASE.
+
+            # 1) Create AXI-Lite interface and connect it to SoC.
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axi_ram_fifo", s_axi_lite, region=SoCRegion(size=0x1000))
+            # 2) Convert AXI-Lite interface to AXI interface.
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
+            # 3) Add AXIFIFO.
+            from axi_fifo import AXIFIFO
+            s_axi_fifo = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules += AXIFIFO(platform, s_axi, s_axi_fifo)
+            # 4) Add AXISRAM.
+            from axi_ram import AXIRAM
+            self.submodules += AXIRAM(platform, s_axi_fifo, size=0x1000)
+
         #axi_syntax_test()
         axi_integration_test()
 
