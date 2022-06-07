@@ -201,7 +201,7 @@ class AXISimSoC(SoCCore):
             from axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi_fifo, size=0x1000)
 
-        #axi_syntax_test()
+        axi_syntax_test()
         axi_integration_test()
 
 # Build --------------------------------------------------------------------------------------------
