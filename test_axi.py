@@ -49,7 +49,7 @@ class Platform(SimPlatform):
     def __init__(self):
         SimPlatform.__init__(self, "SIM", _io)
 
-# AXISimSoC -------------------------------------------------------------------------------------------
+# AXISimSoC ----------------------------------------------------------------------------------------
 
 class AXISimSoC(SoCCore):
     def __init__(self):
@@ -118,7 +118,7 @@ class AXISimSoC(SoCCore):
             # 2) Convert AXI-Lite interface to AXI interface.
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXILite2AXI(s_axi_lite, s_axi)
-            # 3) Add AXISRAM.
+            # 3) Add AXIRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi, size=0x1000)
             # 4) Debug.
