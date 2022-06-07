@@ -6,11 +6,13 @@
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_crossbar.v.
 
+import os
+
 from migen import *
 
 from litex.soc.interconnect.axi import *
 
-from axi_common import *
+from verilog_axi.axi_common import *
 
 # AXI Crossbar -------------------------------------------------------------------------------------
 
@@ -227,9 +229,10 @@ class AXICrossbar(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/arbiter.v")
-        platform.add_source("verilog-axi/rtl/priority_encoder.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar_wr.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar_rd.v")
-        platform.add_source("verilog-axi/rtl/axi_crossbar_addr.v")
+        rtl_dir = os.path.join(os.path.dirname(__file__), "..", "verilog", "rtl")
+        platform.add_source(os.path.join(rtl_dir, "arbiter.v"))
+        platform.add_source(os.path.join(rtl_dir, "priority_encoder.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_crossbar.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_crossbar_wr.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_crossbar_rd.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_crossbar_addr.v"))

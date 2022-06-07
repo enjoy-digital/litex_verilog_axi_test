@@ -6,13 +6,14 @@
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_dp_ram.v.
 
+import os
 import math
 
 from migen import *
 
 from litex.soc.interconnect.axi import *
 
-from axi_common import *
+from verilog_axi.axi_common import *
 
 # AXI DP RAM ---------------------------------------------------------------------------------------
 
@@ -203,7 +204,8 @@ class AXIDPRAM(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_ram_wr_if.v")
-        platform.add_source("verilog-axi/rtl/axi_ram_rd_if.v")
-        platform.add_source("verilog-axi/rtl/axi_ram_wr_rd_if.v")
-        platform.add_source("verilog-axi/rtl/axi_dp_ram.v")
+        rtl_dir = os.path.join(os.path.dirname(__file__), "..", "verilog", "rtl")
+        platform.add_source(os.path.join(rtl_dir, "axi_ram_wr_if.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_ram_rd_if.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_ram_wr_rd_if.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_dp_ram.v"))

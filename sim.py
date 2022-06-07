@@ -21,7 +21,7 @@ from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import *
 from litex.soc.interconnect.axi import *
 
-from axi_common import *
+from verilog_axi.axi_common import *
 
 # IOs ----------------------------------------------------------------------------------------------
 
@@ -69,36 +69,36 @@ class AXISimSoC(SoCCore):
 
         # AXI Tests --------------------------------------------------------------------------------
         def axi_syntax_test():
-            from axi_adapter import AXIAdapter
+            from verilog_axi.axi.axi_adapter import AXIAdapter
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=64, address_width=32, id_width=8)
             #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
-            from axi_ram import AXIRAM
+            from verilog_axi.axi.axi_ram import AXIRAM
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_ram = AXIRAM(platform, s_axi, size=0x1000)
 
-            from axi_register import AXIRegister
+            from verilog_axi.axi.axi_register import AXIRegister
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
 
-            from axi_fifo import AXIFIFO
+            from verilog_axi.axi.axi_fifo import AXIFIFO
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
 
-            from axi_dp_ram import AXIDPRAM
+            from verilog_axi.axi.axi_dp_ram import AXIDPRAM
             s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
             s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
 
-            from axi_crossbar import AXICrossbar
+            from verilog_axi.axi.axi_crossbar import AXICrossbar
             s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
             m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
             self.submodules.axi_crossbar = AXICrossbar(platform, s_axis, m_axis)
 
-            from axi_interconnect import AXIInterconnect
+            from verilog_axi.axi.axi_interconnect import AXIInterconnect
             s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
             m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
             self.submodules.axi_interconnect = AXIInterconnect(platform, s_axis, m_axis)
@@ -119,7 +119,7 @@ class AXISimSoC(SoCCore):
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXILite2AXI(s_axi_lite, s_axi)
             # 3) Add AXISRAM.
-            from axi_ram import AXIRAM
+            from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi, size=0x1000)
             # 4) Debug.
             if 0:
@@ -149,7 +149,7 @@ class AXISimSoC(SoCCore):
             self.submodules += AXILite2AXI(s_axi_lite_a, s_axi_a)
             self.submodules += AXILite2AXI(s_axi_lite_b, s_axi_b)
             # 3) Add AXIDPRAM.
-            from axi_dp_ram import AXIDPRAM
+            from verilog_axi.axi.axi_dp_ram import AXIDPRAM
             self.submodules += AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
             if 0:
                 self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
@@ -174,11 +174,11 @@ class AXISimSoC(SoCCore):
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXILite2AXI(s_axi_lite, s_axi)
             # 3) Add AXIRegister.
-            from axi_register import AXIRegister
+            from verilog_axi.axi.axi_register import AXIRegister
             s_axi_reg = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXIRegister(platform, s_axi, s_axi_reg)
             # 4) Add AXISRAM.
-            from axi_ram import AXIRAM
+            from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi_reg, size=0x1000)
 
 
@@ -194,11 +194,11 @@ class AXISimSoC(SoCCore):
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXILite2AXI(s_axi_lite, s_axi)
             # 3) Add AXIFIFO.
-            from axi_fifo import AXIFIFO
+            from verilog_axi.axi.axi_fifo import AXIFIFO
             s_axi_fifo = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXIFIFO(platform, s_axi, s_axi_fifo)
             # 4) Add AXISRAM.
-            from axi_ram import AXIRAM
+            from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi_fifo, size=0x1000)
 
         axi_syntax_test()

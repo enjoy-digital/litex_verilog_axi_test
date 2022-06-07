@@ -6,11 +6,13 @@
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_register.v.
 
+import os
+
 from migen import *
 
 from litex.soc.interconnect.axi import *
 
-from axi_common import *
+from verilog_axi.axi_common import *
 
 # AXI Register Type --------------------------------------------------------------------------------
 
@@ -251,6 +253,7 @@ class AXIRegister(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_register_wr.v")
-        platform.add_source("verilog-axi/rtl/axi_register_rd.v")
-        platform.add_source("verilog-axi/rtl/axi_register.v")
+        rtl_dir = os.path.join(os.path.dirname(__file__), "..", "verilog", "rtl")
+        platform.add_source(os.path.join(rtl_dir, "axi_register_wr.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_register_rd.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_register.v"))

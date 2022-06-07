@@ -6,11 +6,13 @@
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_adapter.v.
 
+import os
+
 from migen import *
 
 from litex.soc.interconnect.axi import *
 
-from axi_common import *
+from verilog_axi.axi_common import *
 
 # AXI Adapter --------------------------------------------------------------------------------------
 
@@ -228,6 +230,7 @@ class AXIAdapter(Module):
 
     @staticmethod
     def add_sources(platform):
-        platform.add_source("verilog-axi/rtl/axi_adapter_wr.v")
-        platform.add_source("verilog-axi/rtl/axi_adapter_rd.v")
-        platform.add_source("verilog-axi/rtl/axi_adapter.v")
+        rtl_dir = os.path.join(os.path.dirname(__file__), "..", "verilog", "rtl")
+        platform.add_source(os.path.join(rtl_dir, "axi_adapter_wr.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_adapter_rd.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_adapter.v"))
