@@ -17,6 +17,7 @@ from litex.build.sim.verilator import verilator_build_args, verilator_build_argd
 
 from litex.soc.interconnect.csr import *
 from litex.soc.integration.soc_core import *
+from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import *
 from litex.soc.interconnect.axi import *
 
@@ -61,43 +62,60 @@ class AXISimSoC(SoCCore):
         self.submodules.crg = CRG(platform.request("sys_clk"))
 
         # SoCCore ----------------------------------------------------------------------------------
-        SoCCore.__init__(self, platform, clk_freq=sys_clk_freq, uart_name="sim", integrated_rom_size=0x10000)
-        self.add_config("NO_DELAYS")
+        SoCCore.__init__(self, platform, clk_freq=sys_clk_freq, bus_standard="axi-lite", uart_name="sim", integrated_rom_size=0x10000)
+        self.add_config("BIOS_NO_BOOT")
 
         # AXI Tests --------------------------------------------------------------------------------
-        from axi_adapter import AXIAdapter
-        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-        m_axi = AXIInterface(data_width=64, address_width=32, id_width=8)
-        #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
+        def axi_syntax_test():
+            from axi_adapter import AXIAdapter
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            m_axi = AXIInterface(data_width=64, address_width=32, id_width=8)
+            #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
-        from axi_ram import AXIRAM
-        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-        self.submodules.axi_ram = AXIRAM(platform, s_axi, depth=1024)
+            from axi_ram import AXIRAM
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_ram = AXIRAM(platform, s_axi, depth=1024)
 
-        from axi_register import AXIRegister
-        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-        m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-        self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
+            from axi_register import AXIRegister
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
 
-        from axi_fifo import AXIFIFO
-        s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-        m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-        self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
+            from axi_fifo import AXIFIFO
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
 
-        from axi_dp_ram import AXIDPRAM
-        s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
-        s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
-        self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, depth=1024)
+            from axi_dp_ram import AXIDPRAM
+            s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
+            s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, depth=1024)
 
-        from axi_crossbar import AXICrossbar
-        s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
-        m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
-        self.submodules.axi_crossbar = AXICrossbar(platform, s_axis, m_axis)
+            from axi_crossbar import AXICrossbar
+            s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
+            m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
+            self.submodules.axi_crossbar = AXICrossbar(platform, s_axis, m_axis)
 
-        from axi_interconnect import AXIInterconnect
-        s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
-        m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
-        self.submodules.axi_interconnect = AXIInterconnect(platform, s_axis, m_axis)
+            from axi_interconnect import AXIInterconnect
+            s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
+            m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
+            self.submodules.axi_interconnect = AXIInterconnect(platform, s_axis, m_axis)
+
+        def axi_integration_test():
+            # Add AXI RAM to SoC.
+            # -------------------
+            # 1) Create AXI-Lite interface and connect and connect it to SoC.
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axi_ram", s_axi_lite, region=SoCRegion(size=0x1000))
+            # 2) Convert AXI-Lite interface to AXI interface.
+            s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
+            # 3) Add AXISRAM.
+            from axi_ram import AXIRAM
+            self.submodules += AXIRAM(platform, s_axi, depth=0x1000)
+
+        #axi_syntax_test()
+        axi_integration_test()
 
 # Build --------------------------------------------------------------------------------------------
 
