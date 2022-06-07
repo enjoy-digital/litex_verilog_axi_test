@@ -106,7 +106,13 @@ class AXISimSoC(SoCCore):
         def axi_integration_test():
             # Add AXI RAM to SoC.
             # -------------------
-            # 1) Create AXI-Lite interface and connect and connect it to SoC.
+
+            # Test from LiteX BIOS:
+            # mem_list
+            # mem_write <AXI_RAM_BASE> 0x5aa55aa5
+            # mem_read  <AXI_RAM_BASE> 32
+
+            # 1) Create AXI-Lite interface and connect it to SoC.
             s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
             self.bus.add_slave("axi_ram", s_axi_lite, region=SoCRegion(size=0x1000))
             # 2) Convert AXI-Lite interface to AXI interface.
@@ -121,6 +127,39 @@ class AXISimSoC(SoCCore):
                 self.submodules += AXIWDebug(s_axi,  name="AXIRAM")
                 self.submodules += AXIARDebug(s_axi, name="AXIRAM")
                 self.submodules += AXIRDebug(s_axi,  name="AXIRAM")
+
+            # Add AXI DP RAM to SoC.
+            # ----------------------
+
+            # Test from LiteX BIOS:
+            # mem_list
+            # mem_write <AXI_DP_RAM_A_BASE> 0x5aa55aa5
+            # mem_read  <AXI_DP_RAM_B_BASE> 32
+            # mem_write <AXI_DP_RAM_B_BASE + 4> 0xa55aa55a
+            # mem_read  <AXI_DP_RAM_A_BASE> 32
+
+            # 1) Create AXI-Lite interfaces and connect them to SoC.
+            s_axi_lite_a = AXILiteInterface(data_width=32, address_width=32)
+            s_axi_lite_b = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axi_dp_ram_a", s_axi_lite_a, region=SoCRegion(size=0x1000))
+            self.bus.add_slave("axi_dp_ram_b", s_axi_lite_b, region=SoCRegion(size=0x1000))
+            # 2) Convert AXI-Lite interfaces to AXI interfaces.
+            s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=1)
+            s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules += AXILite2AXI(s_axi_lite_a, s_axi_a)
+            self.submodules += AXILite2AXI(s_axi_lite_b, s_axi_b)
+            # 3) Add AXIDPRAM.
+            from axi_dp_ram import AXIDPRAM
+            self.submodules += AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
+            if 0:
+                self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
+                self.submodules += AXIWDebug(s_axi_a,  name="AXIDPRAM_A")
+                self.submodules += AXIARDebug(s_axi_a, name="AXIDPRAM_A")
+                self.submodules += AXIRDebug(s_axi_a,  name="AXIDPRAM_A")
+                self.submodules += AXIAWDebug(s_axi_b, name="AXIDPRAM_B")
+                self.submodules += AXIWDebug(s_axi_b,  name="AXIDPRAM_B")
+                self.submodules += AXIARDebug(s_axi_b, name="AXIDPRAM_B")
+                self.submodules += AXIRDebug(s_axi_b,  name="AXIDPRAM_B")
 
         #axi_syntax_test()
         axi_integration_test()
