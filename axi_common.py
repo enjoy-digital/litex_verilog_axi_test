@@ -27,8 +27,53 @@ def colorer(s, color="bright"):
     return header + str(s) + trailer
 
 
-# AXIError -----------------------------------------------------------------------------------------
+# AXI Error ----------------------------------------------------------------------------------------
 
 class AXIError(Exception):
     def __init__(self):
         sys.stderr = None # Error already described, avoid traceback/exception.
+
+# AXI Debug ----------------------------------------------------------------------------------------
+
+class AXIAWDebug(Module):
+    def __init__(self, axi, name=""):
+        sync = getattr(self.sync, axi.clock_domain)
+        sync += If(axi.aw.valid & axi.aw.ready,
+            Display(f"AXI AW {name}: Addr: %08x, Burst: %d, Len: %d",
+                axi.aw.addr,
+                axi.aw.burst,
+                axi.aw.len
+            ),
+        )
+
+class AXIWDebug(Module):
+    def __init__(self, axi, name=""):
+        sync = getattr(self.sync, axi.clock_domain)
+        sync += If(axi.w.valid & axi.w.ready,
+            Display(f"AXI W {name}: Data: %x, Strb: %x, Last: %d",
+                axi.w.data,
+                axi.w.strb,
+                axi.w.last
+            ),
+        )
+
+class AXIARDebug(Module):
+    def __init__(self, axi, name=""):
+        sync = getattr(self.sync, axi.clock_domain)
+        sync += If(axi.ar.valid & axi.ar.ready,
+            Display(f"AXI AR {name}: Addr: %08d, Burst: %d, Len: %d",
+                axi.ar.addr,
+                axi.ar.burst,
+                axi.ar.len
+            ),
+        )
+
+class AXIRDebug(Module):
+    def __init__(self, axi, name=""):
+        sync = getattr(self.sync, axi.clock_domain)
+        sync += If(axi.r.valid & axi.r.ready,
+            Display(f"AXI R {name}: Data: %x, Last: %d",
+                axi.r.data,
+                axi.r.last
+            ),
+        )

@@ -21,6 +21,8 @@ from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import *
 from litex.soc.interconnect.axi import *
 
+from axi_common import *
+
 # IOs ----------------------------------------------------------------------------------------------
 
 _io = [
@@ -113,6 +115,12 @@ class AXISimSoC(SoCCore):
             # 3) Add AXISRAM.
             from axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi, size=0x1000)
+            # 4) Debug.
+            if 0:
+                self.submodules += AXIAWDebug(s_axi, name="AXIRAM")
+                self.submodules += AXIWDebug(s_axi,  name="AXIRAM")
+                self.submodules += AXIARDebug(s_axi, name="AXIRAM")
+                self.submodules += AXIRDebug(s_axi,  name="AXIRAM")
 
         #axi_syntax_test()
         axi_integration_test()
