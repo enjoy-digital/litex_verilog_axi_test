@@ -72,7 +72,10 @@ class AXIDPRAM(Module):
         else:
             self.logger.info(f"ID Width: {colorer(address_width)}")
 
-        # Depth.
+        # Size.
+        self.logger.info(f"Size: {colorer(size)}bytes")
+
+        # Pipeline/Interleave.
         self.logger.info(f"A Pipeline Output: {a_pipeline_output}.")
         self.logger.info(f"A Interleave R/W:  {a_interleave}.")
         self.logger.info(f"B Pipeline Output: {b_pipeline_output}.")

@@ -36,7 +36,7 @@ class AXIRAM(Module):
         data_width = len(s_axi.w.data)
         self.logger.info(f"Data Width: {colorer(data_width)}")
 
-        # Depth.
+        # Size.
         self.logger.info(f"Size: {colorer(size)}bytes")
 
         # ID width.
