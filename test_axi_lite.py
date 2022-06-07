@@ -69,6 +69,11 @@ class AXISimSoC(SoCCore):
 
         # AXI-Lite Tests ---------------------------------------------------------------------------
         def axi_lite_syntax_test():
+            from verilog_axi.axi_lite.axil_adapter import AXILiteAdapter
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            m_axi_lite = AXILiteInterface(data_width=64, address_width=32)
+            self.submodules.axi_lite_adapter = AXILiteAdapter(platform, s_axi_lite, m_axi_lite)
+
             from verilog_axi.axi_lite.axil_ram import AXILiteRAM
             s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
             self.submodules.axi_lite_ram = AXILiteRAM(platform, s_axi_lite, size=0x1000)
