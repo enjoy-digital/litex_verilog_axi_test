@@ -83,6 +83,11 @@ class AXISimSoC(SoCCore):
             m_axi_lite = AXIInterface(data_width=32, address_width=32)
             self.submodules.axi_lite_register = AXILiteRegister(platform, s_axi_lite, m_axi_lite)
 
+            from verilog_axi.axi_lite.axil_cdc import AXILiteCDC
+            s_axi_lite = AXIInterface(data_width=32, address_width=32)
+            m_axi_lite = AXIInterface(data_width=32, address_width=32)
+            self.submodules.axi_lite_cdc = AXILiteCDC(platform, s_axi_lite, m_axi_lite)
+
         def axi_lite_integration_test():
             # Add AXI-Lite RAM to SoC.
             # ------------------------
@@ -148,6 +153,22 @@ class AXISimSoC(SoCCore):
             # 4) Add AXILiteSRAM.
             from verilog_axi.axi_lite.axil_ram import AXILiteRAM
             self.submodules += AXILiteRAM(platform, s_axi_lite_reg, size=0x1000)
+
+            # Add AXI-Lite RAM to SoC (Through AXI-Lite CDC).
+            # ----------------------------------------------------
+
+            # Test from LiteX BIOS similar to AXI-Lite RAM but with AXIL_RAM_CDC_BASE.
+
+            # 1) Create AXI-Lite interface and connect it to SoC.
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axil_ram_cdc", s_axi_lite, region=SoCRegion(size=0x1000))
+            # 2) Add AXILiteCDC.
+            from verilog_axi.axi_lite.axil_cdc import AXILiteCDC
+            s_axi_lite_cdc = AXILiteInterface(data_width=32, address_width=32)
+            self.submodules += AXILiteCDC(platform, s_axi_lite, s_axi_lite_cdc)
+            # 4) Add AXILiteSRAM.
+            from verilog_axi.axi_lite.axil_ram import AXILiteRAM
+            self.submodules += AXILiteRAM(platform, s_axi_lite_cdc, size=0x1000)
 
         axi_lite_syntax_test()
         axi_lite_integration_test()
