@@ -203,6 +203,27 @@ class AXISimSoC(SoCCore):
             self.submodules += AXILiteRAM(platform, m_axil_0, size=0x1000)
             self.submodules += AXILiteRAM(platform, m_axil_1, size=0x1000)
 
+            # Add AXI RAM to SoC (Through AXI-Lite Interconnect).
+            # ---------------------------------------------------
+
+            # Test from LiteX BIOS similar to AXI RAM but with AXIL_RAM_INT_BASE.
+
+            # 1) Create AXI-Lite interface and connect it to SoC.
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axil_ram_int", s_axi_lite, region=SoCRegion(origin=axil_map["axil_ram_int"], size=0x10000))
+            # 2) Add AXILiteInterconnect  (1 Slave / 2 Masters).
+            from verilog_axi.axi_lite.axil_interconnect import AXILiteInterconnect
+            self.submodules.axil_interconnect = AXILiteInterconnect(platform)
+            self.axil_interconnect.add_slave(s_axil=s_axi_lite)
+            m_axil_0 = AXILiteInterface(data_width=32, address_width=32)
+            m_axil_1 = AXILiteInterface(data_width=32, address_width=32)
+            self.axil_interconnect.add_master(m_axil=m_axil_0, origin=axil_map["axil_ram_int"] + 0x0000, size=0x1000)
+            self.axil_interconnect.add_master(m_axil=m_axil_1, origin=axil_map["axil_ram_int"] + 0x1000, size=0x1000)
+            # 4) Add 2 X AXILiteSRAM.
+            from verilog_axi.axi_lite.axil_ram import AXILiteRAM
+            self.submodules += AXILiteRAM(platform, m_axil_0, size=0x1000)
+            self.submodules += AXILiteRAM(platform, m_axil_1, size=0x1000)
+
         axi_lite_syntax_test()
         axi_lite_integration_test()
 

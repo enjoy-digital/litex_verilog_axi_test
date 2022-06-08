@@ -11,7 +11,7 @@ This repository is an experiment to wrap Alex Forenchich's Verilog-AXI core with
 | axil_cdc          | Done, passing simple tests |
 | axil_crossbar     | Done, passing simple tests |
 | axil_dp_ram       | Done, passing simple tests |
-| axil_interconnect | TODO                       |
+| axil_interconnect | Done, passing simple tests |
 | axil_ram          | Done, passing simple tests |
 | axil_register     | Done, passing simple tests |
 
