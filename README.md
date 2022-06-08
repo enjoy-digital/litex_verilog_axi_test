@@ -11,7 +11,7 @@ This repository is an experiment to wrap Alex Forenchich's Verilog-AXI core with
 | axil_cdc          | Done, passing simple tests |
 | axil_crossbar     | TODO                       |
 | axil_dp_ram       | Done, passing simple tests |
-| axil_interconnect | TODO  |
+| axil_interconnect | TODO                       |
 | axil_ram          | Done, passing simple tests |
 | axil_register     | Done, passing simple tests |
 
@@ -22,7 +22,7 @@ This repository is an experiment to wrap Alex Forenchich's Verilog-AXI core with
 |-------------------|--------------------------------------------------|
 | axi_adapter       | Done, Verilator compil issue                     |
 | axi_cdma          | TODO                                             |
-| axi_crossbar      | Mostly Done, need to add base addresses and test |
+| axi_crossbar      | Done, passing simple tests                       |
 | axi_dma           | TODO                                             |
 | axi_dp_ram        | Done, passing simple tests                       |
 | axi_fifo          | Done, passing simple tests                       |
