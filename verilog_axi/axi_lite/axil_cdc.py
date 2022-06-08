@@ -61,7 +61,6 @@ class AXILiteCDC(Module):
             # -----------
             p_DATA_WIDTH = data_width,
             p_ADDR_WIDTH = address_width,
-            p_STRB_WIDTH = data_width//8,
 
             # Clk / Rst.
             # ----------

@@ -68,9 +68,7 @@ class AXILiteAdapter(Module):
             p_ADDR_WIDTH = address_width,
 
             p_S_DATA_WIDTH = s_data_width,
-            p_S_STRB_WIDTH = s_data_width//8,
             p_M_DATA_WIDTH = m_data_width,
-            p_M_STRB_WIDTH = m_data_width//8,
 
             # Clk / Rst.
             # ----------

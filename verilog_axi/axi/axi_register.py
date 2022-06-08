@@ -100,7 +100,6 @@ class AXIRegister(Module):
             # -----------
             p_DATA_WIDTH = data_width,
             p_ADDR_WIDTH = address_width,
-            p_STRB_WIDTH = data_width//8,
             p_ID_WIDTH   = id_width,
 
             # FIXME: Enable it in LiteX's AXIInterface and add support.

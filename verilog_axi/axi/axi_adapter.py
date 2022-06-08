@@ -81,12 +81,9 @@ class AXIAdapter(Module):
         self.specials += Instance("axi_adapter",
             # Parameters.
             # -----------
-            p_ADDR_WIDTH = address_width,
-
+            p_ADDR_WIDTH   = address_width,
             p_S_DATA_WIDTH = s_data_width,
-            p_S_STRB_WIDTH = s_data_width//8,
             p_M_DATA_WIDTH = m_data_width,
-            p_M_STRB_WIDTH = m_data_width//8,
 
             p_FORWARD_ID = forward_id and (id_width != 0),
             p_ID_WIDTH   = id_width,
