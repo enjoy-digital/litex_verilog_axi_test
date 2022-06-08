@@ -15,6 +15,13 @@ This repository is an experiment to wrap Alex Forenchich's Verilog-AXI core with
 | axil_ram          | Done, passing simple tests |
 | axil_register     | Done, passing simple tests |
 
+[> AXI <-> AXI-Lite Status
+--------------------------
+
+| Module            | Status                                           |
+|-------------------|--------------------------------------------------|
+| axi_axil_adapter  | Done, passing simple tests                       |
+
 [> AXI Status
 ----------------
 
