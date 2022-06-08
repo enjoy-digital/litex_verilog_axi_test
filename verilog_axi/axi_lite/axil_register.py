@@ -18,11 +18,11 @@ from verilog_axi.axi_common import *
 
 class AXILiteRegister(Module):
     def __init__(self, platform, s_axil, m_axil,
-        aw_reg_type = AXIRegisterType.SIMPLE_BUFFER,
-        w_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
-        b_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
-        ar_reg_type = AXIRegisterType.SIMPLE_BUFFER,
-        r_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
+        aw_reg = AXIRegister.SIMPLE_BUFFER,
+        w_reg  = AXIRegister.SIMPLE_BUFFER,
+        b_reg  = AXIRegister.SIMPLE_BUFFER,
+        ar_reg = AXIRegister.SIMPLE_BUFFER,
+        r_reg  = AXIRegister.SIMPLE_BUFFER,
     ):
         self.logger = logging.getLogger("AXILiteRegister")
 
@@ -69,11 +69,11 @@ class AXILiteRegister(Module):
             self.logger.info(f"Data Width: {colorer(data_width)}")
 
         # Registers.
-        self.logger.info(f"AW Reg Type: {aw_reg_type}.")
-        self.logger.info(f" W Reg Type: {w_reg_type}.")
-        self.logger.info(f" B Reg Type: {b_reg_type}.")
-        self.logger.info(f"AR Reg Type: {ar_reg_type}.")
-        self.logger.info(f" R Reg Type: {r_reg_type}.")
+        self.logger.info(f"AW Reg: {aw_reg.name}.")
+        self.logger.info(f" W Reg: {w_reg.name}.")
+        self.logger.info(f" B Reg: {b_reg.name}.")
+        self.logger.info(f"AR Reg: {ar_reg.name}.")
+        self.logger.info(f" R Reg: {r_reg.name}.")
 
         # Module instance.
         # ----------------
@@ -86,11 +86,11 @@ class AXILiteRegister(Module):
             p_STRB_WIDTH = data_width//8,
 
             # Register type.
-            p_AW_REG_TYPE = aw_reg_type,
-            p_W_REG_TYPE  = w_reg_type,
-            p_B_REG_TYPE  = b_reg_type,
-            p_AR_REG_TYPE = ar_reg_type,
-            p_R_REG_TYPE  = r_reg_type,
+            p_AW_REG_TYPE = aw_reg,
+            p_W_REG_TYPE  = w_reg,
+            p_B_REG_TYPE  = b_reg,
+            p_AR_REG_TYPE = ar_reg,
+            p_R_REG_TYPE  = r_reg,
 
             # Clk / Rst.
             # ----------

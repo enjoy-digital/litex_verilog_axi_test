@@ -7,6 +7,8 @@
 import sys
 import logging
 
+from enum import IntEnum
+
 from migen import *
 
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +30,7 @@ def colorer(s, color="bright"):
 
 # AXI Register Type --------------------------------------------------------------------------------
 
-class AXIRegisterType:
+class AXIRegister(IntEnum):
     BYPASS        = 0
     SIMPLE_BUFFER = 1
     SKID_BUFFER   = 2

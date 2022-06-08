@@ -18,11 +18,11 @@ from verilog_axi.axi_common import *
 
 class AXIRegister(Module):
     def __init__(self, platform, s_axi, m_axi,
-        aw_reg_type = AXIRegisterType.SIMPLE_BUFFER,
-        w_reg_type  = AXIRegisterType.SKID_BUFFER,
-        b_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
-        ar_reg_type = AXIRegisterType.SIMPLE_BUFFER,
-        r_reg_type  = AXIRegisterType.SKID_BUFFER,
+        aw_reg = AXIRegister.SIMPLE_BUFFER,
+        w_reg  = AXIRegister.SKID_BUFFER,
+        b_reg  = AXIRegister.SIMPLE_BUFFER,
+        ar_reg = AXIRegister.SIMPLE_BUFFER,
+        r_reg  = AXIRegister.SKID_BUFFER,
     ):
         self.logger = logging.getLogger("AXIAdapter")
 
@@ -86,11 +86,11 @@ class AXIRegister(Module):
             self.logger.info(f"ID Width: {colorer(address_width)}")
 
         # Registers.
-        self.logger.info(f"AW Reg Type: {aw_reg_type}.")
-        self.logger.info(f" W Reg Type: {w_reg_type}.")
-        self.logger.info(f" B Reg Type: {b_reg_type}.")
-        self.logger.info(f"AR Reg Type: {ar_reg_type}.")
-        self.logger.info(f" R Reg Type: {r_reg_type}.")
+        self.logger.info(f"AW Reg: {aw_reg.name}.")
+        self.logger.info(f" W Reg: {w_reg.name}.")
+        self.logger.info(f" B Reg: {b_reg.name}.")
+        self.logger.info(f"AR Reg: {ar_reg.name}.")
+        self.logger.info(f" R Reg: {r_reg.name}.")
 
         # Module instance.
         # ----------------
@@ -116,11 +116,11 @@ class AXIRegister(Module):
             p_RUSER_WIDTH   = 1,
 
             # Register type.
-            p_AW_REG_TYPE = aw_reg_type,
-            p_W_REG_TYPE  = w_reg_type,
-            p_B_REG_TYPE  = b_reg_type,
-            p_AR_REG_TYPE = ar_reg_type,
-            p_R_REG_TYPE  = r_reg_type,
+            p_AW_REG_TYPE = aw_reg,
+            p_W_REG_TYPE  = w_reg,
+            p_B_REG_TYPE  = b_reg,
+            p_AR_REG_TYPE = ar_reg,
+            p_R_REG_TYPE  = r_reg,
 
             # Clk / Rst.
             # ----------
