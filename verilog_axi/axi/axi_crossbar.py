@@ -15,7 +15,7 @@ from litex.soc.interconnect.axi import *
 
 from verilog_axi.axi_common import *
 
-# AXI Crossbar -------------------------------------------------------------------------------------
+# AXI Crossbar Interface ---------------------------------------------------------------------------
 
 class AXICrossbarInterface:
     def __init__(self, axi, origin=None, size=None,
@@ -223,8 +223,6 @@ class AXICrossbar(Module):
         m_axis    = [axi_if.axi                        for axi_if in self.m_axis.values()]
         m_origins = [axi_if.origin                     for axi_if in self.m_axis.values()]
         m_widths  = [math.ceil(math.log2(axi_if.size)) for axi_if in self.m_axis.values()]
-        #print(m_widths)
-        #exit()
 
         def format_m_params(params, width):
             value = 0
