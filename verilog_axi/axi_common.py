@@ -26,6 +26,12 @@ def colorer(s, color="bright"):
     trailer = "\x1b[0m"
     return header + str(s) + trailer
 
+# AXI Register Type --------------------------------------------------------------------------------
+
+class AXIRegisterType:
+    BYPASS        = 0
+    SIMPLE_BUFFER = 1
+    SKID_BUFFER   = 2
 
 # AXI Error ----------------------------------------------------------------------------------------
 

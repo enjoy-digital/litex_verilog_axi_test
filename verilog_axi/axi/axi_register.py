@@ -14,13 +14,6 @@ from litex.soc.interconnect.axi import *
 
 from verilog_axi.axi_common import *
 
-# AXI Register Type --------------------------------------------------------------------------------
-
-class AXIRegisterType:
-    BYPASS        = 0
-    SIMPLE_BUFFER = 1
-    SKID_BUFFER   = 2
-
 # AXI Register -------------------------------------------------------------------------------------
 
 class AXIRegister(Module):

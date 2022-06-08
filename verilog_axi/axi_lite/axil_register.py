@@ -14,21 +14,15 @@ from litex.soc.interconnect.axi import *
 
 from verilog_axi.axi_common import *
 
-# AXI-Lite Register Type ---------------------------------------------------------------------------
-
-class AXILiteRegisterType:
-    BYPASS        = 0
-    SIMPLE_BUFFER = 1
-
 # AXI-Lite Register --------------------------------------------------------------------------------
 
 class AXILiteRegister(Module):
     def __init__(self, platform, s_axil, m_axil,
-        aw_reg_type = AXILiteRegisterType.SIMPLE_BUFFER,
-        w_reg_type  = AXILiteRegisterType.SIMPLE_BUFFER,
-        b_reg_type  = AXILiteRegisterType.SIMPLE_BUFFER,
-        ar_reg_type = AXILiteRegisterType.SIMPLE_BUFFER,
-        r_reg_type  = AXILiteRegisterType.SIMPLE_BUFFER,
+        aw_reg_type = AXIRegisterType.SIMPLE_BUFFER,
+        w_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
+        b_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
+        ar_reg_type = AXIRegisterType.SIMPLE_BUFFER,
+        r_reg_type  = AXIRegisterType.SIMPLE_BUFFER,
     ):
         self.logger = logging.getLogger("AXILiteRegister")
 
