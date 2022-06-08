@@ -7,6 +7,7 @@
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_crossbar.v.
 
 import os
+import math
 
 from migen import *
 
@@ -16,82 +17,230 @@ from verilog_axi.axi_common import *
 
 # AXI Crossbar -------------------------------------------------------------------------------------
 
+class AXICrossbarInterface:
+    def __init__(self, axi, origin=None, size=None,
+        aw_reg = AXIRegister.SIMPLE_BUFFER,
+        w_reg  = AXIRegister.SKID_BUFFER,
+        b_reg  = AXIRegister.SIMPLE_BUFFER,
+        ar_reg = AXIRegister.SIMPLE_BUFFER,
+        r_reg  = AXIRegister.SKID_BUFFER,
+    ):
+        self.axi    = axi
+        self.origin = origin
+        self.size   = size
+        self.aw_reg = aw_reg
+        self.w_reg  = w_reg
+        self.b_reg  = b_reg
+        self.ar_reg = ar_reg
+        self.r_reg  = r_reg
+
+# AXI Crossbar -------------------------------------------------------------------------------------
+
 class AXICrossbar(Module):
-    def __init__(self, platform, s_axis, m_axis):
+    def __init__(self, platform):
         self.logger = logging.getLogger("AXICrossbar")
+        self.s_axis = {}
+        self.m_axis = {}
 
-        # Get/Check Parameters.
-        # ---------------------
+        # Add Sources.
+        # ------------
+        self.add_sources(platform)
 
-        axis = s_axis + m_axis
+    def get_if_name(self, axi):
+        axi_ifs = {**self.s_axis, **self.m_axis}
+        for name, axi_if in axi_ifs.items():
+            if axi is axi_if.axi:
+                return name
+        return None
+
+    def add_slave(self, name=None, s_axi=None,
+        aw_reg = AXIRegister.SIMPLE_BUFFER,
+        w_reg  = AXIRegister.SKID_BUFFER,
+        b_reg  = AXIRegister.SIMPLE_BUFFER,
+        ar_reg = AXIRegister.SIMPLE_BUFFER,
+        r_reg  = AXIRegister.SKID_BUFFER):
+
+        # Get/Check Name.
+        name = f"s_axi{len(self.s_axis)}" if name is None else name
+        if name in self.s_axis.keys():
+            raise ValueError # FIXME: Add error message.
+
+        # Add Slave.
+        assert isinstance(s_axi, AXIInterface)
+        s_axi = AXICrossbarInterface(
+            axi    = s_axi,
+            aw_reg = aw_reg,
+            w_reg  = w_reg,
+            b_reg  = b_reg,
+            ar_reg = ar_reg,
+            r_reg  = r_reg
+        )
+        self.s_axis[name] = s_axi
+
+        # Infos.
+        self.logger.info(f"Add AXI Slave {name} interface.")
+        self.logger.info(f"  AW Reg: {aw_reg.name}.")
+        self.logger.info(f"   W Reg: { w_reg.name}.")
+        self.logger.info(f"   B Reg: { b_reg.name}.")
+        self.logger.info(f"  AR Reg: {ar_reg.name}.")
+        self.logger.info(f"   R Reg: { r_reg.name}.")
+
+        # Check.
+        self.get_check_parameters(show=False)
+
+    def add_master(self, name=None, m_axi=None, origin=None, size=None,
+        aw_reg = AXIRegister.SIMPLE_BUFFER,
+        w_reg  = AXIRegister.SKID_BUFFER,
+        b_reg  = AXIRegister.SIMPLE_BUFFER,
+        ar_reg = AXIRegister.SIMPLE_BUFFER,
+        r_reg  = AXIRegister.SKID_BUFFER):
+
+        # Get/Check Name.
+        name = f"m_axi{len(self.m_axis)}" if name is None else name
+        if name in self.m_axis.keys():
+            raise ValueError # FIXME: Add error message.
+
+        # Add Master.
+        assert isinstance(m_axi, AXIInterface)
+        assert origin is not None
+        assert size   is not None
+        m_axi = AXICrossbarInterface(
+            axi    = m_axi,
+            origin = origin,
+            size   = size,
+            aw_reg = aw_reg,
+            w_reg  = w_reg,
+            b_reg  = b_reg,
+            ar_reg = ar_reg,
+            r_reg  = r_reg
+        )
+        self.m_axis[name] = m_axi
+
+        # Infos.
+        self.logger.info(f"Add AXI Master {name} interface.")
+        self.logger.info(f"  Origin: 0x{origin:08x}.")
+        self.logger.info(f"  Size:   0x{size:0x}.")
+        self.logger.info(f"  AW Reg: {aw_reg.name}.")
+        self.logger.info(f"   W Reg: { w_reg.name}.")
+        self.logger.info(f"   B Reg: { b_reg.name}.")
+        self.logger.info(f"  AR Reg: {ar_reg.name}.")
+        self.logger.info(f"   R Reg: { r_reg.name}.")
+
+        # Check.
+        self.get_check_parameters(show=False)
+
+    def get_check_parameters(self, show=True):
+        axi_ifs = {**self.s_axis, **self.m_axis}
+        axis    = [axi_if.axi for name, axi_if in axi_ifs.items()]
 
         # Clock Domain.
-        clock_domain = axis[0].clock_domain
+        self.clock_domain = clock_domain = axis[0].clock_domain
         for i, axi in enumerate(axis):
             if i == 0:
                 continue
             else:
                 if axi.clock_domain != clock_domain:
-                    self.logger.error("{} on {} (Found: {} and: {}), should be {}.".format(
+                    self.logger.error("{} on {} ({}: {} / {}: {}), should be {}.".format(
                         colorer("Different Clock Domain", color="red"),
                         colorer("AXI interfaces."),
-                        colorer(axi.clock_domain),
+                        self.get_if_name(axis[0]),
                         colorer(clock_domain),
+                        self.get_if_name(axi),
+                        colorer(axi.clock_domain),
                         colorer("the same")))
                     raise AXIError()
-        self.logger.info(f"Clock Domain: {colorer(clock_domain)}")
+        if show:
+            self.logger.info(f"Clock Domain: {colorer(clock_domain)}")
 
         # Address width.
-        address_width = len(axis[0].aw.addr)
+        self.address_width = address_width = len(axis[0].aw.addr)
         for i, axi in enumerate(axis):
             if i == 0:
                 continue
             else:
                 if len(axi.aw.addr) != address_width:
-                    self.logger.error("{} on {} (Found: {} and: {}), should be {}.".format(
+                    self.logger.error("{} on {} ({}: {} / {}: {}), should be {}.".format(
                         colorer("Different Address Width", color="red"),
                         colorer("AXI interfaces."),
-                        colorer(len(axi.aw.addr)),
+                        self.get_if_name(axis[0]),
                         colorer(address_width),
+                        self.get_if_name(axi),
+                        colorer(len(axi.aw.addr)),
                         colorer("the same")))
                     raise AXIError()
-        self.logger.info(f"Address Width: {colorer(address_width)}")
+        if show:
+            self.logger.info(f"Address Width: {colorer(address_width)}")
 
         # Data width.
-        data_width = len(axis[0].w.data)
+        self.data_width = data_width = len(axis[0].w.data)
         for i, axi in enumerate(axis):
             if i == 0:
                 continue
             else:
                 if len(axi.w.data) != data_width:
-                    self.logger.error("{} on {} (Found: {} and: {}), should be {}.".format(
+                    self.logger.error("{} on {} ({}: {} / {}: {}), should be {}.".format(
                         colorer("Different Data Width", color="red"),
                         colorer("AXI interfaces."),
-                        colorer(len(axi.w.data)),
+                        self.get_if_name(axis[0]),
                         colorer(data_width),
+                        self.get_if_name(axi),
+                        colorer(len(axi.w.data)),
                         colorer("the same")))
                     raise AXIError()
-        self.logger.info(f"Data Width: {colorer(address_width)}")
+        if show:
+            self.logger.info(f"Data Width: {colorer(address_width)}")
 
         # ID width.
         # FIXME: Add check.
-        id_width = len(axis[0].aw.id)
-        self.logger.info(f"ID Width: {colorer(id_width)}")
+        self.id_width = id_width = len(axis[0].aw.id)
+        if show:
+            self.logger.info(f"ID Width: {colorer(id_width)}")
 
         # Burst.
         # FIXME: Add check.
 
+    def do_finalize(self):
+        # Get/Check Parameters.
+        # ---------------------
+        self.get_check_parameters()
+
+
+        # Get/Check Parameters.
+        # ---------------------
+        self.logger.info(f"Finalized {len(self.s_axis)}X{len(self.m_axis)} Crossbar:")
+        self.logger.info(f"  Slaves:")
+        for s_name, s_axi in self.s_axis.items():
+            self.logger.info(f"  - {s_name}.")
+        self.logger.info(f"  Masters:")
+        for m_name, m_axi in self.m_axis.items():
+            self.logger.info(f"  - {m_name}, Origin: 0x{m_axi.origin:08x}, Size: 0x{m_axi.size:0x}.")
+
+
         # Module instance.
         # ----------------
+
+        s_axis    = [axi_if.axi                        for axi_if in self.s_axis.values()]
+        m_axis    = [axi_if.axi                        for axi_if in self.m_axis.values()]
+        m_origins = [axi_if.origin                     for axi_if in self.m_axis.values()]
+        m_widths  = [math.ceil(math.log2(axi_if.size)) for axi_if in self.m_axis.values()]
+        #print(m_widths)
+        #exit()
+
+        def format_m_params(params, width):
+            value = 0
+            for param in reversed(params):
+                value <<= width
+                value |= param
+            return Constant(value, len(params)*width)
 
         self.specials += Instance("axi_crossbar",
             # Parameters.
             # -----------
             p_S_COUNT    = len(s_axis),
             p_M_COUNT    = len(m_axis),
-            p_DATA_WIDTH = data_width,
-            p_ADDR_WIDTH = address_width,
-            p_S_ID_WIDTH = id_width,
+            p_DATA_WIDTH = self.data_width,
+            p_ADDR_WIDTH = self.address_width,
+            p_S_ID_WIDTH = self.id_width,
 
             # FIXME: Enable it in LiteX's AXIInterface and add support.
             p_AWUSER_ENABLE = 0,
@@ -105,12 +254,30 @@ class AXICrossbar(Module):
             p_RUSER_ENABLE  = 0,
             p_RUSER_WIDTH   = 1,
 
+            # Slave Registers.
+            p_S_AW_REG_TYPE = format_m_params([axi_if.aw_reg for axi_if in self.s_axis.values()], 2),
+            p_S_W_REG_TYPE  = format_m_params([axi_if.w_reg  for axi_if in self.s_axis.values()], 2),
+            p_S_B_REG_TYPE  = format_m_params([axi_if.b_reg  for axi_if in self.s_axis.values()], 2),
+            p_S_AR_REG_TYPE = format_m_params([axi_if.ar_reg for axi_if in self.s_axis.values()], 2),
+            p_S_R_REG_TYPE  = format_m_params([axi_if.r_reg  for axi_if in self.s_axis.values()], 2),
+
+            # Masters Origin/Size.
+            p_M_BASE_ADDR  = format_m_params(m_origins, self.address_width),
+            p_M_ADDR_WIDTH = format_m_params(m_widths,  32),
+
+            # Master Registers.
+            p_M_AW_REG_TYPE = format_m_params([axi_if.aw_reg for axi_if in self.m_axis.values()], 2),
+            p_M_W_REG_TYPE  = format_m_params([axi_if.w_reg  for axi_if in self.m_axis.values()], 2),
+            p_M_B_REG_TYPE  = format_m_params([axi_if.b_reg  for axi_if in self.m_axis.values()], 2),
+            p_M_AR_REG_TYPE = format_m_params([axi_if.ar_reg for axi_if in self.m_axis.values()], 2),
+            p_M_R_REG_TYPE  = format_m_params([axi_if.r_reg  for axi_if in self.m_axis.values()], 2),
+
             # FIXME: Expose other parameters.
 
             # Clk / Rst.
             # ----------
-            i_clk = ClockSignal(clock_domain),
-            i_rst = ResetSignal(clock_domain),
+            i_clk = ClockSignal(self.clock_domain),
+            i_rst = ResetSignal(self.clock_domain),
 
             # AXI Slave Interfaces.
             # --------------------
@@ -222,10 +389,6 @@ class AXICrossbar(Module):
             i_m_axi_rvalid   = Cat(*[m_axi.r.valid  for m_axi in m_axis]),
             o_m_axi_rready   = Cat(*[m_axi.r.ready  for m_axi in m_axis]),
         )
-
-        # Add Sources.
-        # ------------
-        self.add_sources(platform)
 
     @staticmethod
     def add_sources(platform):

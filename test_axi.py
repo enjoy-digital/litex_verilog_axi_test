@@ -94,9 +94,11 @@ class AXISimSoC(SoCCore):
             self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
 
             from verilog_axi.axi.axi_crossbar import AXICrossbar
-            s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
-            m_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
-            self.submodules.axi_crossbar = AXICrossbar(platform, s_axis, m_axis)
+            self.submodules.axi_crossbar = AXICrossbar(platform)
+            self.axi_crossbar.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
+            self.axi_crossbar.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
+            self.axi_crossbar.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x0000_0000, size=0x0100_0000)
+            self.axi_crossbar.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x1000_0000, size=0x0100_0000)
 
             from verilog_axi.axi.axi_interconnect import AXIInterconnect
             s_axis = [AXIInterface(data_width=32, address_width=32, id_width=8) for _ in range(2)]
