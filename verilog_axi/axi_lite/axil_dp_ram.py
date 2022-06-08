@@ -80,8 +80,8 @@ class AXILiteDPRAM(Module):
             i_b_clk = ClockSignal(s_axil_b.clock_domain),
             i_b_rst = ResetSignal(s_axil_b.clock_domain),
 
-            # AXI A Slave Interface.
-            # --------------------
+            # AXI-Lite A Slave Interface.
+            # ---------------------------
             # AW.
             i_s_axil_a_awaddr   = s_axil_a.aw.addr,
             i_s_axil_a_awprot   = 0b0, # CHECKME.
@@ -111,8 +111,8 @@ class AXILiteDPRAM(Module):
             o_s_axil_a_rvalid   = s_axil_a.r.valid,
             i_s_axil_a_rready   = s_axil_a.r.ready,
 
-            # AXI B Slave Interface.
-            # --------------------
+            # AXI-Lite B Slave Interface.
+            # ---------------------------
             # AW.
             i_s_axil_b_awaddr   = s_axil_b.aw.addr,
             i_s_axil_b_awprot   = 0b0, # CHECKME.

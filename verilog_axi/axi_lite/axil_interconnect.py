@@ -196,8 +196,8 @@ class AXILiteInterconnect(Module):
             i_clk = ClockSignal(self.clock_domain),
             i_rst = ResetSignal(self.clock_domain),
 
-            # AXI Slave Interfaces.
-            # --------------------
+            # AXI-Lite Slave Interfaces.
+            # --------------------------
             # AW.
             i_s_axil_awaddr   = Cat(*[s_axil.aw.addr  for s_axil in s_axils]),
             i_s_axil_awprot   = Cat(*[Constant(0, 3)  for s_axil in s_axils]), # CHECKME.
@@ -227,8 +227,8 @@ class AXILiteInterconnect(Module):
             o_s_axil_rvalid   = Cat(*[s_axil.r.valid  for s_axil in s_axils]),
             i_s_axil_rready   = Cat(*[s_axil.r.ready  for s_axil in s_axils]),
 
-            # AXI Master Interfaces.
-            # ----------------------
+            # AXI-Lite Master Interfaces.
+            # ---------------------------
             # AW.
             o_m_axil_awaddr   = Cat(*[m_axi.aw.addr  for m_axi in m_axils]),
             o_m_axil_awprot   = Cat(*[Signal(3)      for m_axi in m_axils]),

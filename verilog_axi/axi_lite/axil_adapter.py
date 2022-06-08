@@ -75,8 +75,8 @@ class AXILiteAdapter(Module):
             i_clk = ClockSignal(clock_domain),
             i_rst = ResetSignal(clock_domain),
 
-            # AXI Slave Interface.
-            # --------------------
+            # AXI-Lite Slave Interface.
+            # -------------------------
             # AW.
             i_s_axil_awaddr   = s_axil.aw.addr,
             i_s_axil_awprot   = 0b0, # CHECKME.
@@ -106,8 +106,8 @@ class AXILiteAdapter(Module):
             o_s_axil_rvalid   = s_axil.r.valid,
             i_s_axil_rready   = s_axil.r.ready,
 
-            # AXI Master Interface.
-            # ---------------------
+            # AXI-Lite Master Interface.
+            # --------------------------
             # AW.
             o_m_axil_awaddr   = m_axil.aw.addr,
             o_m_axil_awprot   = Open(), # CHECKME.

@@ -54,8 +54,8 @@ class AXILiteRAM(Module):
             i_clk = ClockSignal(clock_domain),
             i_rst = ResetSignal(clock_domain),
 
-            # AXI Slave Interface.
-            # --------------------
+            # AXI-Lite Slave Interface.
+            # -------------------------
             # AW.
             i_s_axil_awaddr   = s_axil.aw.addr,
             i_s_axil_awprot   = 0b0, # CHECKME.
