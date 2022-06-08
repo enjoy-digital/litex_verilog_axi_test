@@ -89,6 +89,17 @@ class AXISimSoC(SoCCore):
             self.submodules.axi_lite_cdc = AXILiteCDC(platform, s_axi_lite, m_axi_lite)
 
         def axi_lite_integration_test():
+            # AXI-Lite Test Mapping.
+            # ----------------------
+            axil_map = {
+                "axil_ram"      : 0x010000,
+                "axil_dp_ram_a" : 0x011000,
+                "axil_dp_ram_b" : 0x012000,
+                "axil_ram_reg"  : 0x013000,
+                "axil_ram_cdc"  : 0x014000,
+                "axil_ram_xbar" : 0x100000,
+                "axil_ram_int"  : 0x200000,
+            }
             # Add AXI-Lite RAM to SoC.
             # ------------------------
 
@@ -99,7 +110,7 @@ class AXISimSoC(SoCCore):
 
             # 1) Create AXI-Lite interface and connect it to SoC.
             s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axil_ram", s_axi_lite, region=SoCRegion(size=0x1000))
+            self.bus.add_slave("axil_ram", s_axi_lite, region=SoCRegion(origin=axil_map["axil_ram"], size=0x1000))
             # 2) Add AXILiteRAM.
             from verilog_axi.axi_lite.axil_ram import AXILiteRAM
             self.submodules += AXILiteRAM(platform, s_axi_lite, size=0x1000)
@@ -123,8 +134,8 @@ class AXISimSoC(SoCCore):
             # 1) Create AXI-Lite interfaces and connect them to SoC.
             s_axi_lite_a = AXILiteInterface(data_width=32, address_width=32)
             s_axi_lite_b = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axil_dp_ram_a", s_axi_lite_a, region=SoCRegion(size=0x1000))
-            self.bus.add_slave("axil_dp_ram_b", s_axi_lite_b, region=SoCRegion(size=0x1000))
+            self.bus.add_slave("axil_dp_ram_a", s_axi_lite_a, region=SoCRegion(origin=axil_map["axil_dp_ram_a"], size=0x1000))
+            self.bus.add_slave("axil_dp_ram_b", s_axi_lite_b, region=SoCRegion(origin=axil_map["axil_dp_ram_b"], size=0x1000))
             # 2) Add AXILiteDPRAM.
             from verilog_axi.axi_lite.axil_dp_ram import AXILiteDPRAM
             self.submodules += AXILiteDPRAM(platform, s_axi_lite_a, s_axi_lite_b, size=0x1000)
@@ -145,7 +156,7 @@ class AXISimSoC(SoCCore):
 
             # 1) Create AXI-Lite interface and connect it to SoC.
             s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axil_ram_reg", s_axi_lite, region=SoCRegion(size=0x1000))
+            self.bus.add_slave("axil_ram_reg", s_axi_lite, region=SoCRegion(origin=axil_map["axil_ram_reg"], size=0x1000))
             # 2) Add AXILiteRegister.
             from verilog_axi.axi_lite.axil_register import AXILiteRegister
             s_axi_lite_reg = AXILiteInterface(data_width=32, address_width=32)
@@ -161,7 +172,7 @@ class AXISimSoC(SoCCore):
 
             # 1) Create AXI-Lite interface and connect it to SoC.
             s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axil_ram_cdc", s_axi_lite, region=SoCRegion(size=0x1000))
+            self.bus.add_slave("axil_ram_cdc", s_axi_lite, region=SoCRegion(origin=axil_map["axil_ram_cdc"], size=0x1000))
             # 2) Add AXILiteCDC.
             from verilog_axi.axi_lite.axil_cdc import AXILiteCDC
             s_axi_lite_cdc = AXILiteInterface(data_width=32, address_width=32)
@@ -169,6 +180,28 @@ class AXISimSoC(SoCCore):
             # 4) Add AXILiteSRAM.
             from verilog_axi.axi_lite.axil_ram import AXILiteRAM
             self.submodules += AXILiteRAM(platform, s_axi_lite_cdc, size=0x1000)
+
+
+            # Add AXI RAM to SoC (Through AXI-Lite Crossbar).
+            # -----------------------------------------------
+
+            # Test from LiteX BIOS similar to AXI RAM but with AXIL_RAM_XBAR_BASE.
+
+            # 1) Create AXI-Lite interface and connect it to SoC.
+            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axil_ram_xbar", s_axi_lite, region=SoCRegion(origin=axil_map["axil_ram_xbar"], size=0x10000))
+            # 2) Add AXILiteCrossbar  (1 Slave / 2 Masters).
+            from verilog_axi.axi_lite.axil_crossbar import AXILiteCrossbar
+            self.submodules.axil_crossbar = AXILiteCrossbar(platform)
+            self.axil_crossbar.add_slave(s_axil=s_axi_lite)
+            m_axil_0 = AXILiteInterface(data_width=32, address_width=32)
+            m_axil_1 = AXILiteInterface(data_width=32, address_width=32)
+            self.axil_crossbar.add_master(m_axil=m_axil_0, origin=axil_map["axil_ram_xbar"] + 0x0000, size=0x1000)
+            self.axil_crossbar.add_master(m_axil=m_axil_1, origin=axil_map["axil_ram_xbar"] + 0x1000, size=0x1000)
+            # 4) Add 2 X AXILiteSRAM.
+            from verilog_axi.axi_lite.axil_ram import AXILiteRAM
+            self.submodules += AXILiteRAM(platform, m_axil_0, size=0x1000)
+            self.submodules += AXILiteRAM(platform, m_axil_1, size=0x1000)
 
         axi_lite_syntax_test()
         axi_lite_integration_test()
