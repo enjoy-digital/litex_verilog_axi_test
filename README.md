@@ -26,6 +26,6 @@ This repository is an experiment to wrap Alex Forenchich's Verilog-AXI core with
 | axi_dma           | TODO                                             |
 | axi_dp_ram        | Done, passing simple tests                       |
 | axi_fifo          | Done, passing simple tests                       |
-| axi_interconnect  | Mostly Done, need to add base addresses and test |
+| axi_interconnect  | Done, passing simple tests                       |
 | axi_ram           | Done, passing simple tests                       |
 | axi _register     | Done, passing simple tests                       |
