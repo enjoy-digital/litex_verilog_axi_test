@@ -71,8 +71,8 @@ class AXISimSoC(SoCCore):
         def axi_syntax_test():
             from verilog_axi.axi.axi_adapter import AXIAdapter
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            m_axi = AXIInterface(data_width=64, address_width=32, id_width=8)
-            #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
             from verilog_axi.axi.axi_ram import AXIRAM
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
