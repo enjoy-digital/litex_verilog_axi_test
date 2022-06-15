@@ -128,16 +128,13 @@ class AXISimSoC(SoCCore):
             # mem_write <AXI_RAM_BASE> 0x5aa55aa5
             # mem_read  <AXI_RAM_BASE> 32
 
-            # 1) Create AXI-Lite interface and connect it to SoC.
-            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axi_ram", s_axi_lite, region=SoCRegion(origin=axi_map["axi_ram"], size=0x1000))
-            # 2) Convert AXI-Lite interface to AXI interface.
+            # 1) Create AXI interface and connect it to SoC.
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
-            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
-            # 3) Add AXIRAM.
+            self.bus.add_slave("axi_ram", s_axi, region=SoCRegion(origin=axi_map["axi_ram"], size=0x1000))
+            # 2) Add AXIRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi, size=0x1000)
-            # 4) Debug.
+            # 3) Debug.
             if 0:
                 self.submodules += AXIAWDebug(s_axi, name="AXIRAM")
                 self.submodules += AXIWDebug(s_axi,  name="AXIRAM")
@@ -154,17 +151,12 @@ class AXISimSoC(SoCCore):
             # mem_write <AXI_DP_RAM_B_BASE + 4> 0xa55aa55a
             # mem_read  <AXI_DP_RAM_A_BASE> 32
 
-            # 1) Create AXI-Lite interfaces and connect them to SoC.
-            s_axi_lite_a = AXILiteInterface(data_width=32, address_width=32)
-            s_axi_lite_b = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axi_dp_ram_a", s_axi_lite_a, region=SoCRegion(origin=axi_map["axi_dp_ram_a"], size=0x1000))
-            self.bus.add_slave("axi_dp_ram_b", s_axi_lite_b, region=SoCRegion(origin=axi_map["axi_dp_ram_b"], size=0x1000))
-            # 2) Convert AXI-Lite interfaces to AXI interfaces.
+            # 1) Create AXI interfaces and connect them to SoC.
             s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=1)
             s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=1)
-            self.submodules += AXILite2AXI(s_axi_lite_a, s_axi_a)
-            self.submodules += AXILite2AXI(s_axi_lite_b, s_axi_b)
-            # 3) Add AXIDPRAM.
+            self.bus.add_slave("axi_dp_ram_a", s_axi_a, region=SoCRegion(origin=axi_map["axi_dp_ram_a"], size=0x1000))
+            self.bus.add_slave("axi_dp_ram_b", s_axi_b, region=SoCRegion(origin=axi_map["axi_dp_ram_b"], size=0x1000))
+            # 2) Add AXIDPRAM.
             from verilog_axi.axi.axi_dp_ram import AXIDPRAM
             self.submodules += AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
             if 0:
@@ -183,17 +175,14 @@ class AXISimSoC(SoCCore):
 
             # Test from LiteX BIOS similar to AXI RAM but with AXI_RAM_REG_BASE.
 
-            # 1) Create AXI-Lite interface and connect it to SoC.
-            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axi_ram_reg", s_axi_lite, region=SoCRegion(origin=axi_map["axi_ram_reg"], size=0x1000))
-            # 2) Convert AXI-Lite interface to AXI interface.
+            # 1) Create AXI interface and connect it to SoC.
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
-            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
-            # 3) Add AXIRegister.
+            self.bus.add_slave("axi_ram_reg", s_axi, region=SoCRegion(origin=axi_map["axi_ram_reg"], size=0x1000))
+            # 2) Add AXIRegister.
             from verilog_axi.axi.axi_register import AXIRegister
             s_axi_reg = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXIRegister(platform, s_axi, s_axi_reg)
-            # 4) Add AXISRAM.
+            # 3) Add AXISRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi_reg, size=0x1000)
 
@@ -203,17 +192,14 @@ class AXISimSoC(SoCCore):
 
             # Test from LiteX BIOS similar to AXI RAM but with AXI_RAM_FIFO_BASE.
 
-            # 1) Create AXI-Lite interface and connect it to SoC.
-            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axi_ram_fifo", s_axi_lite, region=SoCRegion(origin=axi_map["axi_ram_fifo"], size=0x1000))
-            # 2) Convert AXI-Lite interface to AXI interface.
+            # 1) Create AXI interface and connect it to SoC.
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
-            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
-            # 3) Add AXIFIFO.
+            self.bus.add_slave("axi_ram_fifo", s_axi, region=SoCRegion(origin=axi_map["axi_ram_fifo"], size=0x1000))
+            # 2) Add AXIFIFO.
             from verilog_axi.axi.axi_fifo import AXIFIFO
             s_axi_fifo = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules += AXIFIFO(platform, s_axi, s_axi_fifo)
-            # 4) Add AXISRAM.
+            # 3) Add AXISRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, s_axi_fifo, size=0x1000)
 
@@ -222,13 +208,10 @@ class AXISimSoC(SoCCore):
 
             # Test from LiteX BIOS similar to AXI RAM but with AXI_RAM_XBAR_BASE.
 
-            # 1) Create AXI-Lite interface and connect it to SoC.
-            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axi_ram_xbar", s_axi_lite, region=SoCRegion(origin=axi_map["axi_ram_xbar"], size=0x10000))
-            # 2) Convert AXI-Lite interface to AXI interface.
+            # 1) Create AXI interface and connect it to SoC.
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
-            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
-            # 3) Add AXICrossbar  (1 Slave / 2 Masters).
+            self.bus.add_slave("axi_ram_xbar", s_axi, region=SoCRegion(origin=axi_map["axi_ram_xbar"], size=0x10000))
+            # 2) Add AXICrossbar  (1 Slave / 2 Masters).
             from verilog_axi.axi.axi_crossbar import AXICrossbar
             self.submodules.axi_crossbar = AXICrossbar(platform)
             self.axi_crossbar.add_slave(s_axi=s_axi)
@@ -236,7 +219,7 @@ class AXISimSoC(SoCCore):
             m_axi_1 = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.axi_crossbar.add_master(m_axi=m_axi_0, origin=axi_map["axi_ram_xbar"] + 0x0000, size=0x1000)
             self.axi_crossbar.add_master(m_axi=m_axi_1, origin=axi_map["axi_ram_xbar"] + 0x1000, size=0x1000)
-            # 4) Add 2 X AXISRAM.
+            # 3) Add 2 X AXISRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, m_axi_0, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
@@ -246,13 +229,10 @@ class AXISimSoC(SoCCore):
 
             # Test from LiteX BIOS similar to AXI RAM but with AXI_RAM_INT_BASE.
 
-            # 1) Create AXI-Lite interface and connect it to SoC.
-            s_axi_lite = AXILiteInterface(data_width=32, address_width=32)
-            self.bus.add_slave("axi_ram_int", s_axi_lite, region=SoCRegion(origin=axi_map["axi_ram_int"], size=0x10000))
-            # 2) Convert AXI-Lite interface to AXI interface.
-            s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
-            self.submodules += AXILite2AXI(s_axi_lite, s_axi)
-            # 3) Add AXIInterconnect  (1 Slave / 2 Masters).
+            # 1) Create AXI interface and connect it to SoC.
+            s_axi = AXIInterface(data_width=32, address_width=32)
+            self.bus.add_slave("axi_ram_int", s_axi, region=SoCRegion(origin=axi_map["axi_ram_int"], size=0x10000))
+            # 2) Add AXIInterconnect  (1 Slave / 2 Masters).
             from verilog_axi.axi.axi_interconnect import AXIInterconnect
             self.submodules.axi_interconnect = AXIInterconnect(platform)
             self.axi_interconnect.add_slave(s_axi=s_axi)
@@ -260,7 +240,7 @@ class AXISimSoC(SoCCore):
             m_axi_1 = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.axi_interconnect.add_master(m_axi=m_axi_0, origin=axi_map["axi_ram_int"] + 0x0000, size=0x1000)
             self.axi_interconnect.add_master(m_axi=m_axi_1, origin=axi_map["axi_ram_int"] + 0x1000, size=0x1000)
-            # 4) Add 2 X AXISRAM.
+            # 3) Add 2 X AXISRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, m_axi_0, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
