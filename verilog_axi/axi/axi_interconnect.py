@@ -334,4 +334,5 @@ class AXIInterconnect(Module):
     def add_sources(platform):
         rtl_dir = os.path.join(os.path.dirname(__file__), "..", "verilog", "rtl")
         platform.add_source(os.path.join(rtl_dir, "arbiter.v"))
+        platform.add_source(os.path.join(rtl_dir, "priority_encoder.v"))
         platform.add_source(os.path.join(rtl_dir, "axi_interconnect.v"))
