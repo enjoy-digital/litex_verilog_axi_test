@@ -393,6 +393,8 @@ class AXICrossbar(Module):
         rtl_dir = os.path.join(os.path.dirname(__file__), "..", "verilog", "rtl")
         platform.add_source(os.path.join(rtl_dir, "arbiter.v"))
         platform.add_source(os.path.join(rtl_dir, "priority_encoder.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_register_wr.v"))
+        platform.add_source(os.path.join(rtl_dir, "axi_register_rd.v"))
         platform.add_source(os.path.join(rtl_dir, "axi_crossbar.v"))
         platform.add_source(os.path.join(rtl_dir, "axi_crossbar_wr.v"))
         platform.add_source(os.path.join(rtl_dir, "axi_crossbar_rd.v"))
