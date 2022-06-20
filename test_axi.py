@@ -211,18 +211,21 @@ class AXISimSoC(SoCCore):
             # 1) Create AXI interface and connect it to SoC.
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.bus.add_slave("axi_ram_xbar", s_axi, region=SoCRegion(origin=axi_map["axi_ram_xbar"], size=0x10000))
-            # 2) Add AXICrossbar  (1 Slave / 2 Masters).
+            # 2) Add AXICrossbar  (1 Slave / 3 Masters).
             from verilog_axi.axi.axi_crossbar import AXICrossbar
             self.submodules.axi_crossbar = AXICrossbar(platform)
             self.axi_crossbar.add_slave(s_axi=s_axi)
             m_axi_0 = AXIInterface(data_width=32, address_width=32, id_width=1)
             m_axi_1 = AXIInterface(data_width=32, address_width=32, id_width=1)
+            m_axi_2 = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.axi_crossbar.add_master(m_axi=m_axi_0, origin=axi_map["axi_ram_xbar"] + 0x0000, size=0x1000)
             self.axi_crossbar.add_master(m_axi=m_axi_1, origin=axi_map["axi_ram_xbar"] + 0x1000, size=0x1000)
-            # 3) Add 2 X AXISRAM.
+            self.axi_crossbar.add_master(m_axi=m_axi_2, origin=axi_map["axi_ram_xbar"] + 0x2000, size=0x1000)
+            # 3) Add 3 X AXISRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, m_axi_0, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
+            self.submodules += AXIRAM(platform, m_axi_2, size=0x1000)
 
             # Add AXI RAM to SoC (Through AXI Interconnect).
             # ------------------------------------------
@@ -232,18 +235,21 @@ class AXISimSoC(SoCCore):
             # 1) Create AXI interface and connect it to SoC.
             s_axi = AXIInterface(data_width=32, address_width=32)
             self.bus.add_slave("axi_ram_int", s_axi, region=SoCRegion(origin=axi_map["axi_ram_int"], size=0x10000))
-            # 2) Add AXIInterconnect  (1 Slave / 2 Masters).
+            # 2) Add AXIInterconnect  (1 Slave / 3 Masters).
             from verilog_axi.axi.axi_interconnect import AXIInterconnect
             self.submodules.axi_interconnect = AXIInterconnect(platform)
             self.axi_interconnect.add_slave(s_axi=s_axi)
             m_axi_0 = AXIInterface(data_width=32, address_width=32, id_width=1)
             m_axi_1 = AXIInterface(data_width=32, address_width=32, id_width=1)
+            m_axi_2 = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.axi_interconnect.add_master(m_axi=m_axi_0, origin=axi_map["axi_ram_int"] + 0x0000, size=0x1000)
             self.axi_interconnect.add_master(m_axi=m_axi_1, origin=axi_map["axi_ram_int"] + 0x1000, size=0x1000)
-            # 3) Add 2 X AXISRAM.
+            self.axi_interconnect.add_master(m_axi=m_axi_2, origin=axi_map["axi_ram_int"] + 0x2000, size=0x1000)
+            # 3) Add 3 X AXISRAM.
             from verilog_axi.axi.axi_ram import AXIRAM
             self.submodules += AXIRAM(platform, m_axi_0, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
+            self.submodules += AXIRAM(platform, m_axi_2, size=0x1000)
 
         axi_syntax_test()
         axi_integration_test()
