@@ -53,7 +53,7 @@ class AXILiteInterconnect(Module):
         s_axil = AXILiteInterconnectInterface(axi=s_axil)
         self.s_axils[name] = s_axil
 
-        # Infos.
+        # Info.
         self.logger.info(f"Add AXI-Lite Slave {name} interface.")
 
         # Check.
@@ -76,7 +76,7 @@ class AXILiteInterconnect(Module):
         )
         self.m_axils[name] = m_axil
 
-        # Infos.
+        # Info.
         self.logger.info(f"Add AXI-Lite Master {name} interface.")
         self.logger.info(f"  Origin: 0x{origin:08x}.")
         self.logger.info(f"  Size:   0x{size:0x}.")
