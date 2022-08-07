@@ -144,7 +144,7 @@ class AXIInterconnect(Module):
                         colorer("the same")))
                     raise AXIError()
         if show:
-            self.logger.info(f"Data Width: {colorer(address_width)}")
+            self.logger.info(f"Data Width: {colorer(data_width)}")
 
         # ID width.
         # FIXME: Add check.

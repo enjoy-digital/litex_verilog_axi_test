@@ -70,7 +70,7 @@ class AXIAdapter(Module):
                 colorer("the same")))
             raise AXIError()
         else:
-            self.logger.info(f"ID Width: {colorer(address_width)}")
+            self.logger.info(f"ID Width: {colorer(id_width)}")
 
         # Burst.
         # FIXME: Add check.
