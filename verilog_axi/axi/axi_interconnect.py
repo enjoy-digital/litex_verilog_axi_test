@@ -53,7 +53,7 @@ class AXIInterconnect(Module):
         s_axi = AXIInterconnectInterface(axi=s_axi)
         self.s_axis[name] = s_axi
 
-        # Infos.
+        # Info.
         self.logger.info(f"Add AXI Slave {name} interface.")
 
         # Check.
@@ -77,7 +77,7 @@ class AXIInterconnect(Module):
         )
         self.m_axis[name] = m_axi
 
-        # Infos.
+        # Info.
         self.logger.info(f"Add AXI Master {name} interface.")
         self.logger.info(f"  Origin: 0x{origin:08x}.")
         self.logger.info(f"  Size:   0x{size:0x}.")
@@ -144,7 +144,7 @@ class AXIInterconnect(Module):
                         colorer("the same")))
                     raise AXIError()
         if show:
-            self.logger.info(f"Data Width: {colorer(address_width)}")
+            self.logger.info(f"Data Width: {colorer(data_width)}")
 
         # ID width.
         # FIXME: Add check.

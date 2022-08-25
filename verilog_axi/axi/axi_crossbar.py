@@ -77,7 +77,7 @@ class AXICrossbar(Module):
         )
         self.s_axis[name] = s_axi
 
-        # Infos.
+        # Info.
         self.logger.info(f"Add AXI Slave {name} interface.")
         self.logger.info(f"  AW Reg: {aw_reg.name}.")
         self.logger.info(f"   W Reg: { w_reg.name}.")
@@ -116,7 +116,7 @@ class AXICrossbar(Module):
         )
         self.m_axis[name] = m_axi
 
-        # Infos.
+        # Info.
         self.logger.info(f"Add AXI Master {name} interface.")
         self.logger.info(f"  Origin: 0x{origin:08x}.")
         self.logger.info(f"  Size:   0x{size:0x}.")
