@@ -69,30 +69,42 @@ class AXISimSoC(SoCCore):
 
         # AXI Tests --------------------------------------------------------------------------------
         def axi_syntax_test():
+            # AXIADapter.
+            # -----------
             from verilog_axi.axi.axi_adapter import AXIAdapter
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
+            # AXIRAM.
+            # -------
             from verilog_axi.axi.axi_ram import AXIRAM
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_ram = AXIRAM(platform, s_axi, size=0x1000)
 
+            # AXIARegister.
+            # -------------
             from verilog_axi.axi.axi_register import AXIRegister
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
 
+            # AXIFIFO.
+            # --------
             from verilog_axi.axi.axi_fifo import AXIFIFO
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
 
+            # AXIDPRAM.
+            # ---------
             from verilog_axi.axi.axi_dp_ram import AXIDPRAM
             s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
             s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
 
+            # AXICrossbar.
+            # ------------
             from verilog_axi.axi.axi_crossbar import AXICrossbar
             self.submodules.axi_crossbar = AXICrossbar(platform)
             self.axi_crossbar.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
@@ -100,12 +112,20 @@ class AXISimSoC(SoCCore):
             self.axi_crossbar.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x0000_0000, size=0x0100_0000)
             self.axi_crossbar.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x1000_0000, size=0x0100_0000)
 
+            # AXIInterconnect.
+            # ----------------
             from verilog_axi.axi.axi_interconnect import AXIInterconnect
             self.submodules.axi_interconnect = AXIInterconnect(platform)
             self.axi_interconnect.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
             self.axi_interconnect.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
             self.axi_interconnect.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x0000_0000, size=0x0100_0000)
             self.axi_interconnect.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x1000_0000, size=0x0100_0000)
+
+            # AXICDMA.
+            # --------
+            from verilog_axi.axi.axi_cdma import AXICDMA
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_cdma = AXICDMA(platform, m_axi)
 
         def axi_integration_test():
             # AXI Test Mapping.
