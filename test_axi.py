@@ -69,42 +69,42 @@ class AXISimSoC(SoCCore):
 
         # AXI Tests --------------------------------------------------------------------------------
         def axi_syntax_test():
-            # AXIADapter.
-            # -----------
+            # AXI Adapter.
+            # ------------
             from verilog_axi.axi.axi_adapter import AXIAdapter
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
 
-            # AXIRAM.
-            # -------
+            # AXI RAM.
+            # --------
             from verilog_axi.axi.axi_ram import AXIRAM
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_ram = AXIRAM(platform, s_axi, size=0x1000)
 
-            # AXIARegister.
+            # AXI Register.
             # -------------
             from verilog_axi.axi.axi_register import AXIRegister
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_register = AXIRegister(platform, s_axi, m_axi)
 
-            # AXIFIFO.
-            # --------
+            # AXI FIFO.
+            # ---------
             from verilog_axi.axi.axi_fifo import AXIFIFO
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_fifo = AXIFIFO(platform, s_axi, m_axi)
 
-            # AXIDPRAM.
-            # ---------
+            # AXI DPRAM.
+            # ----------
             from verilog_axi.axi.axi_dp_ram import AXIDPRAM
             s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=8)
             s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_dp_ram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
 
-            # AXICrossbar.
-            # ------------
+            # AXI Crossbar.
+            # -------------
             from verilog_axi.axi.axi_crossbar import AXICrossbar
             self.submodules.axi_crossbar = AXICrossbar(platform)
             self.axi_crossbar.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
@@ -112,8 +112,8 @@ class AXISimSoC(SoCCore):
             self.axi_crossbar.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x0000_0000, size=0x0100_0000)
             self.axi_crossbar.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x1000_0000, size=0x0100_0000)
 
-            # AXIInterconnect.
-            # ----------------
+            # AXI Interconnect.
+            # -----------------
             from verilog_axi.axi.axi_interconnect import AXIInterconnect
             self.submodules.axi_interconnect = AXIInterconnect(platform)
             self.axi_interconnect.add_slave(s_axi=AXIInterface(data_width=32, address_width=32, id_width=8))
@@ -121,11 +121,17 @@ class AXISimSoC(SoCCore):
             self.axi_interconnect.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x0000_0000, size=0x0100_0000)
             self.axi_interconnect.add_master(m_axi=AXIInterface(data_width=32, address_width=32, id_width=8), origin=0x1000_0000, size=0x0100_0000)
 
-            # AXICDMA.
-            # --------
+            # AXI CDMA.
+            # ---------
             from verilog_axi.axi.axi_cdma import AXICDMA
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             self.submodules.axi_cdma = AXICDMA(platform, m_axi)
+
+            # AXI DMA.
+            # --------
+            from verilog_axi.axi.axi_dma import AXIDMA
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_dma = AXIDMA(platform, m_axi)
 
         def axi_integration_test():
             # AXI Test Mapping.
