@@ -28,9 +28,9 @@ This repository is an experiment to wrap Alex Forenchich's Verilog-AXI core with
 | Module            | Status                                           |
 |-------------------|--------------------------------------------------|
 | axi_adapter       | Done, Verilator compil issue                     |
-| axi_cdma          | TODO                                             |
+| axi_cdma          | Wrapped, need testing                            |
 | axi_crossbar      | Done, passing simple tests                       |
-| axi_dma           | TODO                                             |
+| axi_dma           | Wrapped, need testing                            |
 | axi_dp_ram        | Done, passing simple tests                       |
 | axi_fifo          | Done, passing simple tests                       |
 | axi_interconnect  | Done, passing simple tests                       |
