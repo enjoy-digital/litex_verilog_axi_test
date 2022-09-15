@@ -207,18 +207,16 @@ class AXICrossbar(Module):
                 for c in ["aw", "w", "b", "ar", "r"]:
                     axi_c_0 = getattr(axis[0], c)
                     axi_c_i = getattr(axis[i], c)
-                    if hasattr(axi_c_0, "user"):
-                        user_width = len(m_axi_c.user)
-                        if len(axi_c_0.user) != len(axi_c_1.user):
-                            self.logger.error("{} on {} ({} / {}), should be {}.".format(
-                                colorer("Different User Width", color="red"),
-                                colorer("AXI interfaces."),
-                                colorer(len(axi_c_0.user)),
-                                colorer(len(axi_c_1.user)),
-                                colorer("the same")))
-                            raise AXIError()
-                        else:
-                            self.logger.info(f"{c.upper()} User Width: {colorer(user_width)}")
+                    if axi_c_0.user_width != axi_c_i.user_width:
+                        self.logger.error("{} on {} ({} / {}), should be {}.".format(
+                            colorer("Different User Width", color="red"),
+                            colorer("AXI interfaces."),
+                            colorer(axi_c_0.user_width),
+                            colorer(axi_c_i.user_width),
+                            colorer("the same")))
+                        raise AXIError()
+                    else:
+                        self.logger.info(f"{c.upper()} User Width: {colorer(axi_c_0.user_width)}")
 
     def do_finalize(self):
         # Get/Check Parameters.
@@ -321,7 +319,7 @@ class AXICrossbar(Module):
             i_s_axi_awcache  = Cat(*[s_axi.aw.cache for s_axi in s_axis]),
             i_s_axi_awprot   = Cat(*[s_axi.aw.prot  for s_axi in s_axis]),
             i_s_axi_awqos    = Cat(*[s_axi.aw.qos   for s_axi in s_axis]),
-            i_s_axi_awuser   = Cat(*[getattr(s_axi.aw, "user", Constant(0, awuser_width)) for s_axi in s_axis]),
+            i_s_axi_awuser   = Cat(*[s_axi.aw.user  for s_axi in s_axis]),
             i_s_axi_awvalid  = Cat(*[s_axi.aw.valid for s_axi in s_axis]),
             o_s_axi_awready  = Cat(*[s_axi.aw.ready for s_axi in s_axis]),
 
@@ -329,14 +327,14 @@ class AXICrossbar(Module):
             i_s_axi_wdata    = Cat(*[s_axi.w.data   for s_axi in s_axis]),
             i_s_axi_wstrb    = Cat(*[s_axi.w.strb   for s_axi in s_axis]),
             i_s_axi_wlast    = Cat(*[s_axi.w.last   for s_axi in s_axis]),
-            i_s_axi_wuser    = Cat(*[getattr(s_axi.w, "user", Constant(0, wuser_width)) for s_axi in s_axis]),
+            i_s_axi_wuser    = Cat(*[s_axi.w.user   for s_axi in s_axis]),
             i_s_axi_wvalid   = Cat(*[s_axi.w.valid  for s_axi in s_axis]),
             o_s_axi_wready   = Cat(*[s_axi.w.ready  for s_axi in s_axis]),
 
             # B.
             o_s_axi_bid      = Cat(*[s_axi.b.id     for s_axi in s_axis]),
             o_s_axi_bresp    = Cat(*[s_axi.b.resp   for s_axi in s_axis]),
-            o_s_axi_buser    = Cat(*[getattr(s_axi.b, "user", Open(buser_width)) for s_axi in s_axis]),
+            o_s_axi_buser    = Cat(*[s_axi.b.user   for s_axi in s_axis]),
             o_s_axi_bvalid   = Cat(*[s_axi.b.valid  for s_axi in s_axis]),
             i_s_axi_bready   = Cat(*[s_axi.b.ready  for s_axi in s_axis]),
 
@@ -350,7 +348,7 @@ class AXICrossbar(Module):
             i_s_axi_arcache  = Cat(*[s_axi.ar.cache for s_axi in s_axis]),
             i_s_axi_arprot   = Cat(*[s_axi.ar.prot  for s_axi in s_axis]),
             i_s_axi_arqos    = Cat(*[s_axi.ar.qos   for s_axi in s_axis]),
-            i_s_axi_aruser   = Cat(*[getattr(s_axi.ar, "user", Constant(0, ruser_width)) for s_axi in s_axis]),
+            i_s_axi_aruser   = Cat(*[s_axi.ar.user  for s_axi in s_axis]),
             i_s_axi_arvalid  = Cat(*[s_axi.ar.valid for s_axi in s_axis]),
             o_s_axi_arready  = Cat(*[s_axi.ar.ready for s_axi in s_axis]),
 
@@ -359,7 +357,7 @@ class AXICrossbar(Module):
             o_s_axi_rdata    = Cat(*[s_axi.r.data   for s_axi in s_axis]),
             o_s_axi_rresp    = Cat(*[s_axi.r.resp   for s_axi in s_axis]),
             o_s_axi_rlast    = Cat(*[s_axi.r.last   for s_axi in s_axis]),
-            o_s_axi_ruser    = Cat(*[getattr(s_axi.r, "user", Open(ruser_width)) for s_axi in s_axis]),
+            o_s_axi_ruser    = Cat(*[s_axi.r.user   for s_axi in s_axis]),
             o_s_axi_rvalid   = Cat(*[s_axi.r.valid  for s_axi in s_axis]),
             i_s_axi_rready   = Cat(*[s_axi.r.ready  for s_axi in s_axis]),
 
@@ -376,7 +374,7 @@ class AXICrossbar(Module):
             o_m_axi_awprot   = Cat(*[m_axi.aw.prot   for m_axi in m_axis]),
             o_m_axi_awqos    = Cat(*[m_axi.aw.qos    for m_axi in m_axis]),
             o_m_axi_awregion = Cat(*[m_axi.aw.region for m_axi in m_axis]),
-            o_m_axi_awuser   = Cat(*[getattr(m_axi.aw, "user", Open(awuser_width)) for m_axi in m_axis]),
+            o_m_axi_awuser   = Cat(*[m_axi.aw.user   for m_axi in m_axis]),
             o_m_axi_awvalid  = Cat(*[m_axi.aw.valid  for m_axi in m_axis]),
             i_m_axi_awready  = Cat(*[m_axi.aw.ready  for m_axi in m_axis]),
 
@@ -384,14 +382,14 @@ class AXICrossbar(Module):
             o_m_axi_wdata    = Cat(*[m_axi.w.data    for m_axi in m_axis]),
             o_m_axi_wstrb    = Cat(*[m_axi.w.strb    for m_axi in m_axis]),
             o_m_axi_wlast    = Cat(*[m_axi.w.last    for m_axi in m_axis]),
-            o_m_axi_wuser    = Cat(*[getattr(m_axi.w, "user", Open(wuser_width)) for m_axi in m_axis]),
+            o_m_axi_wuser    = Cat(*[m_axi.w.user    for m_axi in m_axis]),
             o_m_axi_wvalid   = Cat(*[m_axi.w.valid   for m_axi in m_axis]),
             i_m_axi_wready   = Cat(*[m_axi.w.ready   for m_axi in m_axis]),
 
             # B.
             i_m_axi_bid      = Cat(*[m_axi.b.id      for m_axi in m_axis]),
             i_m_axi_bresp    = Cat(*[m_axi.b.resp    for m_axi in m_axis]),
-            i_m_axi_buser    = Cat(*[getattr(m_axi.b, "user", Constant(0, buser_width)) for m_axi in m_axis]),
+            i_m_axi_buser    = Cat(*[m_axi.b.user    for m_axi in m_axis]),
             i_m_axi_bvalid   = Cat(*[m_axi.b.valid   for m_axi in m_axis]),
             o_m_axi_bready   = Cat(*[m_axi.b.ready   for m_axi in m_axis]),
 
@@ -406,7 +404,7 @@ class AXICrossbar(Module):
             o_m_axi_arprot   = Cat(*[m_axi.ar.prot   for m_axi in m_axis]),
             o_m_axi_arqos    = Cat(*[m_axi.ar.qos    for m_axi in m_axis]),
             o_m_axi_arregion = Cat(*[m_axi.ar.region for m_axi in m_axis]),
-            o_m_axi_aruser   = Cat(*[getattr(m_axi.ar, "user", Open(aruser_width)) for m_axi in m_axis]),
+            o_m_axi_aruser   = Cat(*[m_axi.ar.user   for m_axi in m_axis]),
             o_m_axi_arvalid  = Cat(*[m_axi.ar.valid  for m_axi in m_axis]),
             i_m_axi_arready  = Cat(*[m_axi.ar.ready  for m_axi in m_axis]),
 
@@ -415,7 +413,7 @@ class AXICrossbar(Module):
             i_m_axi_rdata    = Cat(*[m_axi.r.data    for m_axi in m_axis]),
             i_m_axi_rresp    = Cat(*[m_axi.r.resp    for m_axi in m_axis]),
             i_m_axi_rlast    = Cat(*[m_axi.r.last    for m_axi in m_axis]),
-            i_m_axi_ruser    = Cat(*[getattr(m_axi.r, "user", Constant(0, ruser_width)) for m_axi in m_axis]),
+            i_m_axi_ruser    = Cat(*[m_axi.r.user    for m_axi in m_axis]),
             i_m_axi_rvalid   = Cat(*[m_axi.r.valid   for m_axi in m_axis]),
             o_m_axi_rready   = Cat(*[m_axi.r.ready   for m_axi in m_axis]),
         )

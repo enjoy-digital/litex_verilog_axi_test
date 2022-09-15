@@ -92,18 +92,16 @@ class AXIRegister(Module):
         for c in ["aw", "w", "b", "ar", "r"]:
             m_axi_c = getattr(m_axi, c)
             s_axi_c = getattr(s_axi, c)
-            if hasattr(m_axi_c, "user"):
-                user_width = len(m_axi_c.user)
-                if len(s_axi_c.user) != len(m_axi_c.user):
-                    self.logger.error("{} on {} (Slave: {} / Master: {}), should be {}.".format(
-                        colorer("Different User Width", color="red"),
-                        colorer("AXI interfaces."),
-                        colorer(len(s_axi_c.user)),
-                        colorer(len(m_axi_c.user)),
-                        colorer("the same")))
-                    raise AXIError()
-                else:
-                    self.logger.info(f"{c.upper()} User Width: {colorer(user_width)}")
+            if s_axi_c.user_width != m_axi_c.user_width:
+                self.logger.error("{} on {} (Slave: {} / Master: {}), should be {}.".format(
+                    colorer("Different User Width", color="red"),
+                    colorer("AXI interfaces."),
+                    colorer(s_axi_c.user_width),
+                    colorer(m_axi_c.user_width),
+                    colorer("the same")))
+                raise AXIError()
+            else:
+                self.logger.info(f"{c.upper()} User Width: {colorer(m_axi_c.user_width)}")
 
         # Module instance.
         # ----------------
@@ -115,16 +113,16 @@ class AXIRegister(Module):
             p_ADDR_WIDTH = address_width,
             p_ID_WIDTH   = id_width,
 
-            p_AWUSER_ENABLE = 0 if not hasattr(s_axi.aw, "user") else 1,
-            p_AWUSER_WIDTH  = 1 if not hasattr(s_axi.aw, "user") else len(s_axi.aw),
-            p_WUSER_ENABLE  = 0 if not hasattr(s_axi.w,  "user") else 1,
-            p_WUSER_WIDTH   = 1 if not hasattr(s_axi.w,  "user") else len(s_axi.w),
-            p_BUSER_ENABLE  = 0 if not hasattr(s_axi.b,  "user") else 1,
-            p_BUSER_WIDTH   = 1 if not hasattr(s_axi.b,  "user") else len(s_axi.b),
-            p_ARUSER_ENABLE = 0 if not hasattr(s_axi.ar, "user") else 1,
-            p_ARUSER_WIDTH  = 1 if not hasattr(s_axi.ar, "user") else len(s_axi.ar),
-            p_RUSER_ENABLE  = 0 if not hasattr(s_axi.r,  "user") else 1,
-            p_RUSER_WIDTH   = 1 if not hasattr(s_axi.r,  "user") else len(s_axi.r),
+            p_AWUSER_ENABLE = s_axi.aw.user_width > 0,
+            p_AWUSER_WIDTH  = max(1, s_axi.aw.user_width),
+            p_WUSER_ENABLE  = s_axi.w.user_width > 0,
+            p_WUSER_WIDTH   = max(1, s_axi.w.user_width),
+            p_BUSER_ENABLE  = s_axi.b.user_width > 0,
+            p_BUSER_WIDTH   = max(1, s_axi.b.user_width),
+            p_ARUSER_ENABLE = s_axi.ar.user_width > 0,
+            p_ARUSER_WIDTH  = max(1, s_axi.ar.user_width),
+            p_RUSER_ENABLE  = s_axi.r.user_width > 0,
+            p_RUSER_WIDTH   = max(1, s_axi.r.user_width),
 
             # Register type.
             p_AW_REG_TYPE = aw_reg,
@@ -151,7 +149,7 @@ class AXIRegister(Module):
             i_s_axi_awprot   = s_axi.aw.prot,
             i_s_axi_awqos    = s_axi.aw.qos,
             i_s_axi_awregion = s_axi.aw.region,
-            i_s_axi_awuser   = getattr(s_axi.aw, "user", 0),
+            i_s_axi_awuser   = s_axi.aw.user,
             i_s_axi_awvalid  = s_axi.aw.valid,
             o_s_axi_awready  = s_axi.aw.ready,
 
@@ -159,14 +157,14 @@ class AXIRegister(Module):
             i_s_axi_wdata    = s_axi.w.data,
             i_s_axi_wstrb    = s_axi.w.strb,
             i_s_axi_wlast    = s_axi.w.last,
-            i_s_axi_wuser    = getattr(s_axi.w, "user", 0),
+            i_s_axi_wuser    = s_axi.w.user,
             i_s_axi_wvalid   = s_axi.w.valid,
             o_s_axi_wready   = s_axi.w.ready,
 
             # B.
             o_s_axi_bid      = s_axi.b.id,
             o_s_axi_bresp    = s_axi.b.resp,
-            o_s_axi_buser    = getattr(s_axi.b, "user", Open()),
+            o_s_axi_buser    = s_axi.b.user,
             o_s_axi_bvalid   = s_axi.b.valid,
             i_s_axi_bready   = s_axi.b.ready,
 
@@ -181,7 +179,7 @@ class AXIRegister(Module):
             i_s_axi_arprot   = s_axi.ar.prot,
             i_s_axi_arqos    = s_axi.ar.qos,
             i_s_axi_arregion = s_axi.ar.region,
-            i_s_axi_aruser   = getattr(s_axi.ar, "user", 0),
+            i_s_axi_aruser   = s_axi.ar.user,
             i_s_axi_arvalid  = s_axi.ar.valid,
             o_s_axi_arready  = s_axi.ar.ready,
 
@@ -190,7 +188,7 @@ class AXIRegister(Module):
             o_s_axi_rdata    = s_axi.r.data,
             o_s_axi_rresp    = s_axi.r.resp,
             o_s_axi_rlast    = s_axi.r.last,
-            o_s_axi_ruser    = getattr(s_axi.r, "user", Open()),
+            o_s_axi_ruser    = s_axi.r.user,
             o_s_axi_rvalid   = s_axi.r.valid,
             i_s_axi_rready   = s_axi.r.ready,
 
@@ -207,7 +205,7 @@ class AXIRegister(Module):
             o_m_axi_awprot   = m_axi.aw.prot,
             o_m_axi_awqos    = m_axi.aw.qos,
             o_m_axi_awregion = m_axi.aw.region,
-            o_m_axi_awuser   = getattr(m_axi.aw, "user", Open()),
+            o_m_axi_awuser   = m_axi.aw.user,
             o_m_axi_awvalid  = m_axi.aw.valid,
             i_m_axi_awready  = m_axi.aw.ready,
 
@@ -215,14 +213,14 @@ class AXIRegister(Module):
             o_m_axi_wdata    = m_axi.w.data,
             o_m_axi_wstrb    = m_axi.w.strb,
             o_m_axi_wlast    = m_axi.w.last,
-            o_m_axi_wuser    = getattr(m_axi.w, "user", Open()),
+            o_m_axi_wuser    = m_axi.w.user,
             o_m_axi_wvalid   = m_axi.w.valid,
             i_m_axi_wready   = m_axi.w.ready,
 
             # B.
             i_m_axi_bid      = m_axi.b.id,
             i_m_axi_bresp    = m_axi.b.resp,
-            i_m_axi_buser    = getattr(m_axi.b, "user", 0),
+            i_m_axi_buser    = m_axi.b.user,
             i_m_axi_bvalid   = m_axi.b.valid,
             o_m_axi_bready   = m_axi.b.ready,
 
@@ -237,7 +235,7 @@ class AXIRegister(Module):
             o_m_axi_arprot   = m_axi.ar.prot,
             o_m_axi_arqos    = m_axi.ar.qos,
             o_m_axi_arregion = m_axi.ar.region,
-            o_m_axi_aruser   = getattr(m_axi.ar, "user", Open()),
+            o_m_axi_aruser   = m_axi.ar.user,
             o_m_axi_arvalid  = m_axi.ar.valid,
             i_m_axi_arready  = m_axi.ar.ready,
 
@@ -246,7 +244,7 @@ class AXIRegister(Module):
             i_m_axi_rdata    = m_axi.r.data,
             i_m_axi_rresp    = m_axi.r.resp,
             i_m_axi_rlast    = m_axi.r.last,
-            i_m_axi_ruser    = getattr(m_axi.r, "user", 0),
+            i_m_axi_ruser    = m_axi.r.user,
             i_m_axi_rvalid   = m_axi.r.valid,
             o_m_axi_rready   = m_axi.r.ready,
         )
