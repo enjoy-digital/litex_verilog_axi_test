@@ -74,7 +74,7 @@ class AXISimSoC(SoCCore):
             from verilog_axi.axi.axi_adapter import AXIAdapter
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
+            #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi) #brings verilator errors
 
             # AXI RAM.
             # --------
@@ -144,6 +144,8 @@ class AXISimSoC(SoCCore):
                 "axi_ram_fifo" : 0x014000,
                 "axi_ram_xbar" : 0x100000,
                 "axi_ram_int"  : 0x200000,
+                #"axi_cdma"     : 0x300000,
+                #"axi_dma"      : 0x400000,
             }
 
             # Add AXI RAM to SoC.
@@ -181,7 +183,7 @@ class AXISimSoC(SoCCore):
             s_axi_a = AXIInterface(data_width=32, address_width=32, id_width=1)
             s_axi_b = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.bus.add_slave("axi_dp_ram_a", s_axi_a, region=SoCRegion(origin=axi_map["axi_dp_ram_a"], size=0x1000))
-            self.bus.add_slave("axi_dp_ram_b", s_axi_b, region=SoCRegion(origin=axi_map["axi_dp_ram_b"], size=0x1000))
+            #self.bus.add_slave("axi_dp_ram_b", s_axi_b, region=SoCRegion(origin=axi_map["axi_dp_ram_b"], size=0x1000))
             # 2) Add AXIDPRAM.
             from verilog_axi.axi.axi_dp_ram import AXIDPRAM
             self.submodules += AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
@@ -287,8 +289,63 @@ class AXISimSoC(SoCCore):
                 self.submodules += AXIWDebug(m_axi,  name=f"M_AXI_{i}")
                 self.submodules += AXIARDebug(m_axi, name=f"M_AXI_{i}")
                 self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
+                
+            # AXI CDMA.
+            # ---------
+            """
+            AXI4 Central DMA
+            https://github.com/alexforencich/verilog-axi/blob/master/rtl/axi_cdma.v
+            desc_layout = [
+                ("read_addr",  address_width), 
+                ("write_addr", address_width), # => main_desc_payload_write_addr
+                ("len",            len_width),
+                ("tag",            tag_width),
+            ]
+            desc_status_layout = [
+                ("tag",   tag_width),
+                ("error",         4),
+            ]
+            
+			await ctrl_regs.write_dword(DMA_SRC_ADDR, src_block.get_absolute_address(0))
+			await ctrl_regs.write_dword(DMA_DST_ADDR, dst_block.get_absolute_address(0))
+			await ctrl_regs.write_dword(DMA_LEN, len(test_data))
+			await ctrl_regs.write_dword(DMA_CONTROL, 1)
 
-        axi_syntax_test()
+			while await ctrl_regs.read_dword(DMA_STATUS) == 0:
+				pass
+			#----
+
+			DescBus, DescTransaction, DescSource, DescSink, DescMonitor = define_stream("Desc",
+			    signals=["addr", "len", "tag", "valid", "ready"],
+			    optional_signals=["id", "dest", "user"]
+			)
+			DescStatusBus, DescStatusTransaction, DescStatusSource, DescStatusSink, DescStatusMonitor = define_stream("DescStatus",
+			    signals=["tag", "error", "valid"],
+			    optional_signals=["len", "id", "dest", "user"]
+			)
+            """
+            # 1) Create AXI interface and connect it to SoC.
+            #s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
+            #self.bus.add_slave("axi_cdma", s_axi, region=SoCRegion(origin=axi_map["axi_cdma"], size=0x1000))
+            # 2) Add AXICDMA.
+            from verilog_axi.axi.axi_cdma import AXICDMA
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules += AXICDMA(platform, m_axi, len_width=32)
+
+            # AXI DMA.
+            # ---------
+            # 1) Create AXI interface and connect it to SoC.
+            #s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
+            #self.bus.add_slave("axi_dma", s_axi, region=SoCRegion(origin=axi_map["axi_dma"], size=0x1000))
+            # 2) Add AXIDMA.
+            from verilog_axi.axi.axi_dma import AXIDMA
+            #m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
+            #self.submodules += AXIDMA(platform, m_axi)
+            self.submodules.axi_dma = AXIDMA(platform, s_axi_b, len_width=32)
+
+
+
+        #axi_syntax_test()
         axi_integration_test()
 
 # Build --------------------------------------------------------------------------------------------
