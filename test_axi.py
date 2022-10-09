@@ -324,13 +324,27 @@ class AXISimSoC(SoCCore):
 			    optional_signals=["len", "id", "dest", "user"]
 			)
             """
-            # 1) Create AXI interface and connect it to SoC.
-            #s_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
-            #self.bus.add_slave("axi_cdma", s_axi, region=SoCRegion(origin=axi_map["axi_cdma"], size=0x1000))
-            # 2) Add AXICDMA.
             from verilog_axi.axi.axi_cdma import AXICDMA
-            m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules += AXICDMA(platform, m_axi, len_width=32)
+            m_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules.axi_cdma = axi_cdma = AXICDMA(platform, m_axi, len_width=32)
+            self.submodules.dpram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
+            self.comb += m_axi.connect(s_axi_b)
+
+            if 1:
+                self.submodules += AXIAWDebug(m_axi, name="AXICDMA")
+                self.submodules += AXIWDebug(m_axi,  name="AXICDMA")
+                self.submodules += AXIARDebug(m_axi, name="AXICDMA")
+                self.submodules += AXIRDebug(m_axi,  name="AXICDMA")
+                self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
+                self.submodules += AXIWDebug(s_axi_a,  name="AXIDPRAM_A")
+                self.submodules += AXIARDebug(s_axi_a, name="AXIDPRAM_A")
+                self.submodules += AXIRDebug(s_axi_a,  name="AXIDPRAM_A")
+                self.submodules += AXIAWDebug(s_axi_b, name="AXIDPRAM_B")
+                self.submodules += AXIWDebug(s_axi_b,  name="AXIDPRAM_B")
+                self.submodules += AXIARDebug(s_axi_b, name="AXIDPRAM_B")
+                self.submodules += AXIRDebug(s_axi_b,  name="AXIDPRAM_B")
+                return
+
 
             # AXI DMA.
             # ---------
