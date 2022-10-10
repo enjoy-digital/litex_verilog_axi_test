@@ -289,7 +289,15 @@ class AXISimSoC(SoCCore):
                 self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
                 
             # AXI CDMA.
-            # ---------
+            #mem_write 0x11000 0x41 4			<-- sets some values in RAM
+            #mem_read 0x11000 64				<-- dump original contents
+            #mem_write 0xf0000000 0				<-- source address
+            #mem_write 0xf0000004 0x20			<-- destination address
+            #mem_write 0xf0000008 2				<-- length (AXI format)
+            #mem_write 0xf0000010 1				<-- toogle VALID (starts when set to 1)
+            #mem_write 0xf0000010 0
+            #mem_read 0x11000 64				<-- dump updated contents
+            
             from verilog_axi.axi.axi_cdma import AXICDMA
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules.axi_cdma = axi_cdma = AXICDMA(platform, m_axi, len_width=32)
@@ -301,15 +309,10 @@ class AXISimSoC(SoCCore):
                 self.submodules += AXIWDebug(m_axi,  name="AXICDMA")
                 self.submodules += AXIARDebug(m_axi, name="AXICDMA")
                 self.submodules += AXIRDebug(m_axi,  name="AXICDMA")
-                #self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
-                #self.submodules += AXIWDebug(s_axi_a,  name="AXIDPRAM_A")
-                #self.submodules += AXIARDebug(s_axi_a, name="AXIDPRAM_A")
-                #self.submodules += AXIRDebug(s_axi_a,  name="AXIDPRAM_A")
                 self.submodules += AXIAWDebug(s_axi_b, name="AXIDPRAM_B")
                 self.submodules += AXIWDebug(s_axi_b,  name="AXIDPRAM_B")
                 self.submodules += AXIARDebug(s_axi_b, name="AXIDPRAM_B")
                 self.submodules += AXIRDebug(s_axi_b,  name="AXIDPRAM_B")
-                return
 
 
             # AXI DMA.
@@ -321,7 +324,7 @@ class AXISimSoC(SoCCore):
             from verilog_axi.axi.axi_dma import AXIDMA
             #m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             #self.submodules += AXIDMA(platform, m_axi)
-            self.submodules.axi_dma = AXIDMA(platform, s_axi_b, len_width=32)
+            #self.submodules.axi_dma = AXIDMA(platform, s_axi_b, len_width=32)
 
 
 

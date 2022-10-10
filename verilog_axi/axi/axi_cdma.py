@@ -160,12 +160,12 @@ class AXICDMA(Module, AutoCSR):
         self.len			= CSRStorage(len_width)
         self.tag			= CSRStorage(tag_width)
         self.valid			= CSRStorage()
-        self.dummy1			= CSRStorage(32, reset=0xBBBBBBBB)
+        #self.dummy1			= CSRStorage(32, reset=0xBBBBBBBB)
         self.ready		= CSRStatus()
         self.status_tag	= CSRStatus(tag_width)
         self.status_error	= CSRStatus(4)
         self.status_valid	= CSRStatus()
-        self.dummy2			= CSRStorage(32, reset=0xAAAAAAAA)
+        #self.dummy2			= CSRStorage(32, reset=0xAAAAAAAA)
         self.comb += [
         	self.desc.read_addr.eq(self.read_addr.storage),
         	self.desc.write_addr.eq(self.write_addr.storage),
