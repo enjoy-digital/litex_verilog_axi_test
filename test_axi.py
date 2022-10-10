@@ -144,8 +144,6 @@ class AXISimSoC(SoCCore):
                 "axi_ram_fifo" : 0x014000,
                 "axi_ram_xbar" : 0x100000,
                 "axi_ram_int"  : 0x200000,
-                #"axi_cdma"     : 0x300000,
-                #"axi_dma"      : 0x400000,
             }
 
             # Add AXI RAM to SoC.
@@ -186,7 +184,7 @@ class AXISimSoC(SoCCore):
             #self.bus.add_slave("axi_dp_ram_b", s_axi_b, region=SoCRegion(origin=axi_map["axi_dp_ram_b"], size=0x1000))
             # 2) Add AXIDPRAM.
             from verilog_axi.axi.axi_dp_ram import AXIDPRAM
-            self.submodules += AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
+            self.submodules += AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000, b_interleave=True) #interleave allows DMA to control the core
             if 0:
                 self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
                 self.submodules += AXIWDebug(s_axi_a,  name="AXIDPRAM_A")
@@ -292,53 +290,21 @@ class AXISimSoC(SoCCore):
                 
             # AXI CDMA.
             # ---------
-            """
-            AXI4 Central DMA
-            https://github.com/alexforencich/verilog-axi/blob/master/rtl/axi_cdma.v
-            desc_layout = [
-                ("read_addr",  address_width), 
-                ("write_addr", address_width), # => main_desc_payload_write_addr
-                ("len",            len_width),
-                ("tag",            tag_width),
-            ]
-            desc_status_layout = [
-                ("tag",   tag_width),
-                ("error",         4),
-            ]
-            
-			await ctrl_regs.write_dword(DMA_SRC_ADDR, src_block.get_absolute_address(0))
-			await ctrl_regs.write_dword(DMA_DST_ADDR, dst_block.get_absolute_address(0))
-			await ctrl_regs.write_dword(DMA_LEN, len(test_data))
-			await ctrl_regs.write_dword(DMA_CONTROL, 1)
-
-			while await ctrl_regs.read_dword(DMA_STATUS) == 0:
-				pass
-			#----
-
-			DescBus, DescTransaction, DescSource, DescSink, DescMonitor = define_stream("Desc",
-			    signals=["addr", "len", "tag", "valid", "ready"],
-			    optional_signals=["id", "dest", "user"]
-			)
-			DescStatusBus, DescStatusTransaction, DescStatusSource, DescStatusSink, DescStatusMonitor = define_stream("DescStatus",
-			    signals=["tag", "error", "valid"],
-			    optional_signals=["len", "id", "dest", "user"]
-			)
-            """
             from verilog_axi.axi.axi_cdma import AXICDMA
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=1)
             self.submodules.axi_cdma = axi_cdma = AXICDMA(platform, m_axi, len_width=32)
             self.submodules.dpram = AXIDPRAM(platform, s_axi_a, s_axi_b, size=0x1000)
             self.comb += m_axi.connect(s_axi_b)
 
-            if 1:
+            if 0:
                 self.submodules += AXIAWDebug(m_axi, name="AXICDMA")
                 self.submodules += AXIWDebug(m_axi,  name="AXICDMA")
                 self.submodules += AXIARDebug(m_axi, name="AXICDMA")
                 self.submodules += AXIRDebug(m_axi,  name="AXICDMA")
-                self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
-                self.submodules += AXIWDebug(s_axi_a,  name="AXIDPRAM_A")
-                self.submodules += AXIARDebug(s_axi_a, name="AXIDPRAM_A")
-                self.submodules += AXIRDebug(s_axi_a,  name="AXIDPRAM_A")
+                #self.submodules += AXIAWDebug(s_axi_a, name="AXIDPRAM_A")
+                #self.submodules += AXIWDebug(s_axi_a,  name="AXIDPRAM_A")
+                #self.submodules += AXIARDebug(s_axi_a, name="AXIDPRAM_A")
+                #self.submodules += AXIRDebug(s_axi_a,  name="AXIDPRAM_A")
                 self.submodules += AXIAWDebug(s_axi_b, name="AXIDPRAM_B")
                 self.submodules += AXIWDebug(s_axi_b,  name="AXIDPRAM_B")
                 self.submodules += AXIARDebug(s_axi_b, name="AXIDPRAM_B")
