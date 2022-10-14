@@ -53,20 +53,26 @@ class Platform(SimPlatform):
 # AXISimSoC ----------------------------------------------------------------------------------------
 
 class AXISimSoC(SoCCore):
-    def __init__(self):
+    def __init__(self, firmware=None):
         # Parameters.
         sys_clk_freq = int(100e6)
 
         # Platform.
-        platform     = Platform()
+        platform = Platform()
         self.comb += platform.trace.eq(1)
 
         # CRG --------------------------------------------------------------------------------------
         self.submodules.crg = CRG(platform.request("sys_clk"))
 
         # SoCCore ----------------------------------------------------------------------------------
-        SoCCore.__init__(self, platform, clk_freq=sys_clk_freq, bus_standard="axi-lite", uart_name="sim", integrated_rom_size=0x10000)
-        self.add_config("BIOS_NO_BOOT")
+        SoCCore.__init__(self, platform, clk_freq=sys_clk_freq, uart_name="sim",
+            bus_standard             ="axi-lite",
+            integrated_rom_size      = 0x10000,
+            integrated_main_ram_size = 0x10000,
+            integrated_main_ram_init = get_mem_data(firmware, endianness="little")
+        )
+        self.add_config("BIOS_NO_DELAYS")
+        self.add_constant("ROM_BOOT_ADDRESS", self.bus.regions["main_ram"].origin)
 
         # AXI Tests --------------------------------------------------------------------------------
         def axi_syntax_test():
@@ -277,16 +283,18 @@ class AXISimSoC(SoCCore):
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_2, size=0x1000)
             # 4) Debug.
-            for i, m_axi in enumerate([s_axi]):
-                self.submodules += AXIAWDebug(s_axi, name=f"S_AXI_{i}")
-                self.submodules += AXIWDebug(s_axi,  name=f"S_AXI_{i}")
-                self.submodules += AXIARDebug(s_axi, name=f"S_AXI_{i}")
-                self.submodules += AXIRDebug(s_axi,  name=f"S_AXI_{i}")
-            for i, m_axi in enumerate([m_axi_0, m_axi_1, m_axi_2]):
-                self.submodules += AXIAWDebug(m_axi, name=f"M_AXI_{i}")
-                self.submodules += AXIWDebug(m_axi,  name=f"M_AXI_{i}")
-                self.submodules += AXIARDebug(m_axi, name=f"M_AXI_{i}")
-                self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
+
+            if 0:
+                for i, m_axi in enumerate([s_axi]):
+                    self.submodules += AXIAWDebug(s_axi, name=f"S_AXI_{i}")
+                    self.submodules += AXIWDebug(s_axi,  name=f"S_AXI_{i}")
+                    self.submodules += AXIARDebug(s_axi, name=f"S_AXI_{i}")
+                    self.submodules += AXIRDebug(s_axi,  name=f"S_AXI_{i}")
+                for i, m_axi in enumerate([m_axi_0, m_axi_1, m_axi_2]):
+                    self.submodules += AXIAWDebug(m_axi, name=f"M_AXI_{i}")
+                    self.submodules += AXIWDebug(m_axi,  name=f"M_AXI_{i}")
+                    self.submodules += AXIARDebug(m_axi, name=f"M_AXI_{i}")
+                    self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
                 
             # AXI CDMA & DMA
             # ----------------
@@ -367,9 +375,18 @@ def main():
     sim_config = SimConfig(default_clk="sys_clk")
     sim_config.add_module("serial2console", "serial")
 
-    soc = AXISimSoC()
-    builder = Builder(soc)
-    builder.build(sim_config=sim_config, **verilator_build_kwargs)
+    for n in range(2):
+        # Create SoC.
+        soc = AXISimSoC(firmware={
+            0 : None,                   # First loop with no firmware (to generate SoC's software headers).
+            1 : "firmware/firmware.bin" # Second loop with compiled firmware.
+        }[n])
+        builder = Builder(soc)
+        builder.build(sim_config=sim_config, **verilator_build_kwargs, run=n >  0)
+
+        # Compile firmware on first loop.
+        if (n == 0):
+            os.system("cd firmware && make clean all")
 
 if __name__ == "__main__":
     main()
