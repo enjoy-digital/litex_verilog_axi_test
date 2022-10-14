@@ -12,6 +12,7 @@
 #include <generated/mem.h>
 
 #include "sim_debug.h"
+#include "axi_mmap.h"
 
 /*-----------------------------------------------------------------------*/
 /* UART                                                                  */
@@ -125,12 +126,18 @@ int main(void)
 #endif
 	uart_init();
 
+	/* Tests. */
+	test_ram("AXI-RAM",      AXI_RAM_BASE);
+	test_ram("AXI-DP-RAM-A", AXI_DP_RAM_A_BASE);
+	test_ram("AXI-DP-RAM-B", AXI_DP_RAM_B_BASE);
+	test_ram("AXI-RAM-REG",  AXI_RAM_REG_BASE);
+	test_ram("AXI-RAM-FIFO", AXI_RAM_FIFO_BASE);
+	test_ram("AXI-RAM-XBAR", AXI_RAM_XBAR_BASE);
+	test_ram("AXI-RAM-INT",  AXI_RAM_INT_BASE);
+
+	/* Console */
 	help();
 	prompt();
-
-	/* Tests. */
-	/* TODO */
-
 	while(1) {
 		console_service();
 	}

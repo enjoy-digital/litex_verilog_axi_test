@@ -283,16 +283,17 @@ class AXISimSoC(SoCCore):
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_2, size=0x1000)
             # 4) Debug.
-            for i, m_axi in enumerate([s_axi]):
-                self.submodules += AXIAWDebug(s_axi, name=f"S_AXI_{i}")
-                self.submodules += AXIWDebug(s_axi,  name=f"S_AXI_{i}")
-                self.submodules += AXIARDebug(s_axi, name=f"S_AXI_{i}")
-                self.submodules += AXIRDebug(s_axi,  name=f"S_AXI_{i}")
-            for i, m_axi in enumerate([m_axi_0, m_axi_1, m_axi_2]):
-                self.submodules += AXIAWDebug(m_axi, name=f"M_AXI_{i}")
-                self.submodules += AXIWDebug(m_axi,  name=f"M_AXI_{i}")
-                self.submodules += AXIARDebug(m_axi, name=f"M_AXI_{i}")
-                self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
+            if 0:
+                for i, m_axi in enumerate([s_axi]):
+                    self.submodules += AXIAWDebug(s_axi, name=f"S_AXI_{i}")
+                    self.submodules += AXIWDebug(s_axi,  name=f"S_AXI_{i}")
+                    self.submodules += AXIARDebug(s_axi, name=f"S_AXI_{i}")
+                    self.submodules += AXIRDebug(s_axi,  name=f"S_AXI_{i}")
+                for i, m_axi in enumerate([m_axi_0, m_axi_1, m_axi_2]):
+                    self.submodules += AXIAWDebug(m_axi, name=f"M_AXI_{i}")
+                    self.submodules += AXIWDebug(m_axi,  name=f"M_AXI_{i}")
+                    self.submodules += AXIARDebug(m_axi, name=f"M_AXI_{i}")
+                    self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
 
         axi_syntax_test()
         axi_integration_test()
