@@ -110,3 +110,33 @@ class AXISWDebug(Module):
             ),
         )
 
+# AXI Connection Helpers ---------------------------------------------------------------------------
+
+def connect_axi_read(master, slave, keep=None, omit=None):
+    channel_modes = {
+        "ar": "master",
+        "r" : "slave",
+    }
+    r = []
+    for channel, mode in channel_modes.items():
+        if mode == "master":
+            m, s = getattr(master, channel), getattr(slave, channel)
+        else:
+            s, m = getattr(master, channel), getattr(slave, channel)
+        r.extend(m.connect(s, keep=keep, omit=omit))
+    return r
+
+def connect_axi_write(master, slave, keep=None, omit=None):
+    channel_modes = {
+        "aw": "master",
+        "w" : "master",
+        "b" : "slave",
+    }
+    r = []
+    for channel, mode in channel_modes.items():
+        if mode == "master":
+            m, s = getattr(master, channel), getattr(slave, channel)
+        else:
+            s, m = getattr(master, channel), getattr(slave, channel)
+        r.extend(m.connect(s, keep=keep, omit=omit))
+    return r
