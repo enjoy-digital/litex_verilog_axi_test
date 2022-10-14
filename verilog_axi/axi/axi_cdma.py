@@ -2,6 +2,7 @@
 # This file is part of LiteX-Verilog-AXI-Test
 #
 # Copyright (c) 2022 Florent Kermarrec <florent@enjoy-digital.fr>
+# Copyright (c) 2022 Victor Suarez Rovere <suarezvictor@gmail.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_cdma.v.

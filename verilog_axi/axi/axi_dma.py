@@ -2,6 +2,7 @@
 # This file is part of LiteX-Verilog-AXI-Test
 #
 # Copyright (c) 2022 Florent Kermarrec <florent@enjoy-digital.fr>
+# Copyright (c) 2022 Victor Suarez Rovere <suarezvictor@gmail.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_dma.v.
@@ -13,12 +14,14 @@ from migen import *
 
 from litex.soc.interconnect import stream
 from litex.soc.interconnect.axi import *
+from litex.soc.interconnect.axi.axi_stream import AXIStreamInterface
+from litex.soc.interconnect.csr import *
 
 from verilog_axi.axi_common import *
 
 # AXI DMA ------------------------------------------------------------------------------------------
 
-class AXIDMA(Module):
+class AXIDMA(Module, AutoCSR):
     def __init__(self, platform, m_axi, len_width=20, tag_width=8, dest_width=1, user_width=1):
         self.logger = logging.getLogger("AXIDMA")
 
@@ -58,17 +61,20 @@ class AXIDMA(Module):
             ("tag",   tag_width),
             ("error",         4),
         ]
-        read_data_layout = [
+        data_layout = [
             ("data",    data_width),
             ("keep", data_width//8),
-            ("tag",      tag_width),
-            ("id",        id_width),
-            ("dest",    dest_width),
-            ("user",    user_width),
         ]
         self.read_desc        = read_desc        = stream.Endpoint(read_desc_layout)
         self.read_desc_status = read_desc_status = stream.Endpoint(read_desc_status_layout)
-        self.read_data        = read_data        = stream.Endpoint(read_data_layout)
+        self.read_data        = read_data        = AXIStreamInterface(
+        	data_width,
+        	data_width//8,
+        	id_width,
+        	dest_width,
+        	user_width,
+        	layout = data_layout) #data_width=0, keep_width=None, id_width=0, dest_width=0, user_width=0, clock_domain="sys", layout=None, name=None):
+         
 
         write_desc_layout = [
             ("addr", address_width),
@@ -83,18 +89,19 @@ class AXIDMA(Module):
             ("user",    user_width),
             ("error",            4),
         ]
-        write_data_layout = [
-            ("data",    data_width),
-            ("keep", data_width//8),
-            ("tag",      tag_width),
-            ("id",        id_width),
-            ("dest",    dest_width),
-            ("user",    user_width),
-        ]
 
         self.write_desc        = write_desc        = stream.Endpoint(write_desc_layout)
         self.write_desc_status = write_desc_status = stream.Endpoint(write_desc_status_layout)
-        self.write_data        = write_data        = stream.Endpoint(write_data_layout)
+        self.write_data        = write_data        = AXIStreamInterface(
+        	data_width,
+        	data_width//8,
+        	id_width,
+        	dest_width,
+        	user_width,
+        	layout = data_layout)
+
+        # Add CSR
+        self.add_csr(address_width, len_width, tag_width)
 
         # Module instance.
         # ----------------
@@ -237,6 +244,45 @@ class AXIDMA(Module):
         # Add Sources.
         # ------------
         self.add_sources(platform)
+
+    def add_csr(self, address_width, len_width, tag_width):
+        self.read_addr		= CSRStorage(address_width)
+        self.len			= CSRStorage(len_width)
+        self.tag			= CSRStorage(tag_width)
+        self.valid			= CSRStorage()
+        self.read_ready		= CSRStatus()
+        self.read_dummy1		= CSRStorage(32, reset=0xCCCCCCCC)
+        self.read_status_tag	= CSRStatus(tag_width)
+        self.read_status_error	= CSRStatus(4)
+        self.read_dummy2		= CSRStorage(32, reset=0xDDDDDDDD)
+        self.comb += [
+        	self.read_desc.addr.eq(self.read_addr.storage),
+        	self.read_desc.len.eq(self.len.storage),
+        	self.read_desc.tag.eq(self.tag.storage),
+        	self.read_desc.valid.eq(self.valid.storage),
+        	self.read_ready.status.eq(self.read_desc.ready),
+        	self.read_status_tag.status.eq(self.read_desc_status.tag),
+        	self.read_status_error.status.eq(self.read_desc_status.error),
+        	]
+
+        self.write_addr			= CSRStorage(address_width)
+        #self.write_len			= CSRStorage(len_width)
+        #self.write_tag			= CSRStorage(tag_width)
+        #self.write_valid		= CSRStorage()
+        self.write_dummy1		= CSRStorage(32, reset=0xEEEEEEEE)
+        self.write_ready		= CSRStatus()
+        self.write_status_tag	= CSRStatus(tag_width)
+        self.write_status_error	= CSRStatus(4)
+        self.write_dummy2		= CSRStorage(32, reset=0xFFFFFFFF)
+        self.comb += [
+        	self.write_desc.addr.eq(self.write_addr.storage),
+        	self.write_desc.len.eq(self.len.storage),
+        	self.write_desc.tag.eq(self.tag.storage),
+        	self.write_desc.valid.eq(self.valid.storage),
+        	self.write_ready.status.eq(self.write_desc.ready),
+        	self.write_status_tag.status.eq(self.write_desc_status.tag),
+        	self.write_status_error.status.eq(self.write_desc_status.error),
+        	]
 
     @staticmethod
     def add_sources(platform):

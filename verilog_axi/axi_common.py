@@ -2,6 +2,7 @@
 # This file is part of LiteX-Verilog-AXI-Test
 #
 # Copyright (c) 2022 Florent Kermarrec <florent@enjoy-digital.fr>
+# Copyright (c) 2022 Victor Suarez Rovere <suarezvictor@gmail.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
 import sys
@@ -58,7 +59,7 @@ class AXIWDebug(Module):
     def __init__(self, axi, name=""):
         sync = getattr(self.sync, axi.clock_domain)
         sync += If(axi.w.valid & axi.w.ready,
-            Display(f"AXI W {name}: Data: 0x%x, Strb: %x, Last: %d",
+            Display(f"AXI W {name}: Data: 0x%x, Strb: 0x%x, Last: %d",
                 axi.w.data,
                 axi.w.strb,
                 axi.w.last
@@ -85,3 +86,27 @@ class AXIRDebug(Module):
                 axi.r.last
             ),
         )
+      
+        
+class AXISRDebug(Module):
+    def __init__(self, axis, cd, name):
+        sync = getattr(self.sync, cd)
+        sync += If(axis.valid & axis.ready,
+            Display(f"AXI-S R {name}: Data: 0x%x, Keep: 0x%x, Last: %d",
+                axis.data,
+                axis.keep,
+                axis.last, #FIXME: optional
+            ),
+        )
+        
+class AXISWDebug(Module):
+    def __init__(self, axis, cd, name):
+        sync = getattr(self.sync, cd)
+        sync += If(axis.valid & axis.ready,
+            Display(f"AXI-S W {name}: Data: 0x%x, Keep: 0x%x, Last: %d",
+                axis.data,
+                axis.keep,
+                axis.last, #FIXME: optional
+            ),
+        )
+
