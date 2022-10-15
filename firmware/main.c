@@ -134,6 +134,9 @@ int main(void)
 	test_ram("AXI-RAM-FIFO", AXI_RAM_FIFO_BASE);
 	test_ram("AXI-RAM-XBAR", AXI_RAM_XBAR_BASE);
 	test_ram("AXI-RAM-INT",  AXI_RAM_INT_BASE);
+	
+	void test_dma(const char *); /*FIXME: move it to axi_mmap.h (missing in repo)*/
+	test_dma("AXI-DMA");
 
 	/* Console */
 	help();

@@ -31,11 +31,13 @@ void test_ram(char * name, uint32_t base) {
 
 void dump_buf(const char *bufname, const uint32_t *buf, size_t size)
 {
+#if 0 /* enable this for debug */
 	printf("%s dump:\n", bufname);
 	for(uint32_t *end = buf+size/sizeof(*buf); buf != end; ++buf)
 	{
 	  printf("Address %p = 0x%08x\n", buf, *buf);
 	}
+#endif
 }
 
 void test_dma(char * name) {
@@ -48,6 +50,8 @@ void test_dma(char * name) {
 	dma_data *dma = (dma_data *) AXI_DP_RAM_2A_BASE;
 
 	printf("\nTesting %s...\n", name);
+	dump_buf("cdma initial config", (uint32_t *) CSR_AXI_CDMA_BASE, 64);
+	dump_buf("dma initial config", (uint32_t *) CSR_AXI_DMA_BASE, 64);
 	
 	/* Set abitrary values */
 	memset(cdma, 0xFF, sizeof(*cdma));
@@ -58,31 +62,31 @@ void test_dma(char * name) {
 	/*Make sure buffers are initially different*/
 	errors += (memcmp(dma->src, cdma->dst, sizeof(dma->src)) == 0);
 	errors += (memcmp(cdma->src, dma->dst, sizeof(cdma->src)) == 0);
-	
+
 	/* Dump "before" state */
-	printf("\nBEFORE state:\n");
-	dump_buf("src_cdma", cdma->src, sizeof(cdma->src));
+	dump_buf("\nBEFORE state:\n" "src_cdma", cdma->src, sizeof(cdma->src));
 	dump_buf("dst_cdma", cdma->dst, sizeof(cdma->dst));
 	dump_buf("src_dma", dma->src, sizeof(dma->src));
 	dump_buf("dst_dma", dma->dst, sizeof(dma->dst));
 	
-	/*Configure CDMA*/
-	axi_cdma_read_addr_write(cdma->src);
-	axi_cdma_write_addr_write(cdma->dst);
+	/*Configure CDMA (it access 2nd port mapped at address 0)*/
+	axi_cdma_read_addr_write(offsetof(dma_data, src));
+	axi_cdma_write_addr_write(offsetof(dma_data, dst));
 	axi_cdma_len_write(sizeof(cdma->dst));
 	axi_cdma_valid_write(1);
 	axi_cdma_valid_write(0);
+	dump_buf("cdma configuration", (uint32_t *) CSR_AXI_CDMA_BASE, 64);
 
-	/*Configure DMA*/
-	axi_dma_read_addr_write(dma->src);
-	axi_dma_write_addr_write(dma->dst);
+	/*Configure DMA (it access 2nd port mapped at address 0)*/
+	axi_dma_read_addr_write(offsetof(dma_data, src));
+	axi_dma_write_addr_write(offsetof(dma_data, dst)); /* 2nd port is mapped at 0 */
 	axi_dma_len_write(sizeof(dma->dst));
 	axi_dma_valid_write(1);
 	axi_dma_valid_write(0);
+	dump_buf("dma configuration", (uint32_t *) CSR_AXI_DMA_BASE, 64);
 
 	/* Dump "after" state */
-	printf("\AFTER state:\n");
-	dump_buf("src_cdma", cdma->src, sizeof(cdma->src));
+	dump_buf("\nAFTER state:\n" "src_cdma", cdma->src, sizeof(cdma->src));
 	dump_buf("dst_cdma", cdma->dst, sizeof(cdma->dst));
 	dump_buf("src_dma", dma->src, sizeof(dma->src));
 	dump_buf("dst_dma", dma->dst, sizeof(dma->dst));
@@ -92,5 +96,5 @@ void test_dma(char * name) {
 	errors += (memcmp(cdma->src, dma->dst, sizeof(cdma->src)) != 0);
 
 	/* Result */
-	printf("\nDMA errors: %d\n", errors);
+	printf("errors: %d\n", errors);
 }

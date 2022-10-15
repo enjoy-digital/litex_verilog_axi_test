@@ -73,8 +73,7 @@ class AXIDMA(Module, AutoCSR):
         	id_width,
         	dest_width,
         	user_width,
-        	layout = data_layout) #data_width=0, keep_width=None, id_width=0, dest_width=0, user_width=0, clock_domain="sys", layout=None, name=None):
-         
+        	layout = data_layout)
 
         write_desc_layout = [
             ("addr", address_width),
@@ -251,10 +250,10 @@ class AXIDMA(Module, AutoCSR):
         self.tag			= CSRStorage(tag_width)
         self.valid			= CSRStorage()
         self.read_ready		= CSRStatus()
-        self.read_dummy1		= CSRStorage(32, reset=0xCCCCCCCC)
+        #self.read_dummy1		= CSRStorage(32, reset=0xCCCCCCCC)
         self.read_status_tag	= CSRStatus(tag_width)
         self.read_status_error	= CSRStatus(4)
-        self.read_dummy2		= CSRStorage(32, reset=0xDDDDDDDD)
+        #self.read_dummy2		= CSRStorage(32, reset=0xDDDDDDDD)
         self.comb += [
         	self.read_desc.addr.eq(self.read_addr.storage),
         	self.read_desc.len.eq(self.len.storage),
@@ -269,11 +268,11 @@ class AXIDMA(Module, AutoCSR):
         #self.write_len			= CSRStorage(len_width)
         #self.write_tag			= CSRStorage(tag_width)
         #self.write_valid		= CSRStorage()
-        self.write_dummy1		= CSRStorage(32, reset=0xEEEEEEEE)
+        #self.write_dummy1		= CSRStorage(32, reset=0xEEEEEEEE)
         self.write_ready		= CSRStatus()
         self.write_status_tag	= CSRStatus(tag_width)
         self.write_status_error	= CSRStatus(4)
-        self.write_dummy2		= CSRStorage(32, reset=0xFFFFFFFF)
+        #self.write_dummy2		= CSRStorage(32, reset=0xFFFFFFFF)
         self.comb += [
         	self.write_desc.addr.eq(self.write_addr.storage),
         	self.write_desc.len.eq(self.len.storage),
