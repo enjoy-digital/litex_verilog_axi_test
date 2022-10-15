@@ -160,7 +160,7 @@ class AXICDMA(Module, AutoCSR):
         self.write_addr			= CSRStorage(address_width)
         self.len			= CSRStorage(len_width)
         self.tag			= CSRStorage(tag_width)
-        self.valid			= CSRStorage()
+        self.valid			= CSRStorage(fields=[CSRField("valid", pulse=True)])
         #self.dummy1			= CSRStorage(32, reset=0xBBBBBBBB)
         self.ready		= CSRStatus()
         self.status_tag	= CSRStatus(tag_width)
