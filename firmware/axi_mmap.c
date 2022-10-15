@@ -73,16 +73,14 @@ void test_dma(char * name) {
 	axi_cdma_read_addr_write(offsetof(dma_data, src));
 	axi_cdma_write_addr_write(offsetof(dma_data, dst));
 	axi_cdma_len_write(sizeof(cdma->dst));
-	axi_cdma_valid_write(1);
-	axi_cdma_valid_write(0);
+	axi_cdma_valid_write(1); /* Any value written starts*/
 	dump_buf("cdma configuration", (uint32_t *) CSR_AXI_CDMA_BASE, 64);
 
 	/*Configure DMA (it access 2nd port mapped at address 0)*/
 	axi_dma_read_addr_write(offsetof(dma_data, src));
 	axi_dma_write_addr_write(offsetof(dma_data, dst)); /* 2nd port is mapped at 0 */
 	axi_dma_len_write(sizeof(dma->dst));
-	axi_dma_valid_write(1);
-	axi_dma_valid_write(0);
+	axi_dma_valid_write(1); /* Any value written starts*/
 	dump_buf("dma configuration", (uint32_t *) CSR_AXI_DMA_BASE, 64);
 
 	/* Dump "after" state */

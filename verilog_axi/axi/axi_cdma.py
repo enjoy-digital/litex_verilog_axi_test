@@ -172,7 +172,7 @@ class AXICDMA(Module, AutoCSR):
         	self.desc.write_addr.eq(self.write_addr.storage),
         	self.desc.len.eq(self.len.storage),
         	self.desc.tag.eq(self.tag.storage),
-        	self.desc.valid.eq(self.valid.storage),
+        	self.desc.valid.eq(self.valid.re),
         	self.ready.status.eq(self.desc.ready),
         	self.status_tag.status.eq(self.desc_status.tag),
         	self.status_error.status.eq(self.desc_status.error),
