@@ -190,12 +190,6 @@ class AXICrossbar(Module):
         if show:
             self.logger.info(f"Data Width: {colorer(data_width)}")
 
-        # ID width.
-        # FIXME: Add check.
-        self.id_width = id_width = len(axis[0].aw.id)
-        if show:
-            self.logger.info(f"ID Width: {colorer(id_width)}")
-
         # Burst.
         # FIXME: Add check.
 
@@ -207,6 +201,8 @@ class AXICrossbar(Module):
                 for c in ["aw", "w", "b", "ar", "r"]:
                     axi_c_0 = getattr(axis[0], c)
                     axi_c_i = getattr(axis[i], c)
+                    if not hasattr(axi_c_0, "user_width") and not hasattr(axi_c_i, "user_width"):
+                        continue
                     if axi_c_0.user_width != axi_c_i.user_width:
                         self.logger.error("{} on {} ({} / {}), should be {}.".format(
                             colorer("Different User Width", color="red"),
@@ -219,6 +215,21 @@ class AXICrossbar(Module):
                         self.logger.info(f"{c.upper()} User Width: {colorer(axi_c_0.user_width)}")
 
     def do_finalize(self):
+        axis_ifs = {**self.s_axis}
+        axiss   = [axi_if.axi for name, axi_if in axis_ifs.items()]
+        axim_ifs = {**self.m_axis}
+        axims   = [axi_if.axi for name, axi_if in axim_ifs.items()]
+        # ID width. Can't be checked until all interfaces have been added.
+        self.s_id_width = s_id_width = len(axiss[0].aw.id)
+        self.m_id_width = m_id_width = len(axims[0].aw.id)
+        self.logger.info(f"Slave ID Width: {colorer(s_id_width)}")
+        self.logger.info(f"Master ID width: {colorer(m_id_width)}")
+        if m_id_width != s_id_width + log2_int(len(self.s_axis)):
+            self.logger.error(
+                "ID width mismatch. Expected slave ID width of {} and master ID width of {}".format(
+                    s_id_width, m_id_width + log2_int(len(self.s_axis))
+            ))
+
         # Get/Check Parameters.
         # ---------------------
         self.get_check_parameters()
@@ -251,15 +262,15 @@ class AXICrossbar(Module):
 
 
         # User Enable/Width computation.
-        awuser_enable = 0 if not hasattr(s_axis[0].aw, "user") else 1
+        awuser_enable = 0 if not hasattr(s_axis[0].aw, "user") else 1 if s_axis[0].aw.user_width !=0 else 0
         awuser_width  = 1 if not hasattr(s_axis[0].aw, "user") else len(s_axis[0].aw)
-        wuser_enable  = 0 if not hasattr(s_axis[0].w,  "user") else 1
+        wuser_enable  = 0 if not hasattr(s_axis[0].w,  "user") else 1 if s_axis[0].w.user_width !=0 else 0
         wuser_width   = 1 if not hasattr(s_axis[0].w,  "user") else len(s_axis[0].w)
-        buser_enable  = 0 if not hasattr(s_axis[0].b,  "user") else 1
+        buser_enable  = 0 if not hasattr(s_axis[0].b,  "user") else 1 if s_axis[0].b.user_width !=0 else 0
         buser_width   = 1 if not hasattr(s_axis[0].b,  "user") else len(s_axis[0].b)
-        aruser_enable = 0 if not hasattr(s_axis[0].ar, "user") else 1
+        aruser_enable = 0 if not hasattr(s_axis[0].ar, "user") else 1 if s_axis[0].ar.user_width !=0 else 0
         aruser_width  = 1 if not hasattr(s_axis[0].ar, "user") else len(s_axis[0].ar)
-        ruser_enable  = 0 if not hasattr(s_axis[0].r,  "user") else 1
+        ruser_enable  = 0 if not hasattr(s_axis[0].r,  "user") else 1 if s_axis[0].r.user_width !=0 else 0
         ruser_width   = 1 if not hasattr(s_axis[0].r,  "user") else len(s_axis[0].r)
 
         self.specials += Instance("axi_crossbar",
@@ -269,7 +280,8 @@ class AXICrossbar(Module):
             p_M_COUNT    = len(m_axis),
             p_DATA_WIDTH = self.data_width,
             p_ADDR_WIDTH = self.address_width,
-            p_S_ID_WIDTH = self.id_width,
+            p_S_ID_WIDTH = self.s_id_width,
+            p_M_ID_WIDTH = self.m_id_width,
 
             p_AWUSER_ENABLE = awuser_enable,
             p_AWUSER_WIDTH  = awuser_width,
