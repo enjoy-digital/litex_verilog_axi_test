@@ -2,6 +2,7 @@
 # This file is part of LiteX-Verilog-AXI-Test
 #
 # Copyright (c) 2022 Florent Kermarrec <florent@enjoy-digital.fr>
+# Copyright (c) 2022 Victor Suarez Rovere <suarezvictor@gmail.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
 # LiteX wrapper around Alex Forencich Verilog-AXI's axi_cdma.v.
@@ -13,12 +14,13 @@ from migen import *
 
 from litex.soc.interconnect import stream
 from litex.soc.interconnect.axi import *
+from litex.soc.interconnect.csr import *
 
 from verilog_axi.axi_common import *
 
 # AXI CDMA -----------------------------------------------------------------------------------------
 
-class AXICDMA(Module):
+class AXICDMA(Module, AutoCSR):
     def __init__(self, platform, m_axi, len_width=20, tag_width=8):
         self.logger = logging.getLogger("AXICDMA")
 
@@ -59,6 +61,9 @@ class AXICDMA(Module):
         self.desc        = desc        = stream.Endpoint(desc_layout)
         self.desc_status = desc_status = stream.Endpoint(desc_status_layout)
 
+        # Add CSR
+        self.add_csr(address_width, len_width, tag_width)
+
         # Module instance.
         # ----------------
 
@@ -77,6 +82,10 @@ class AXICDMA(Module):
             # ----------
             i_clk = ClockSignal(clock_domain),
             i_rst = ResetSignal(clock_domain),
+
+            # Configuration.
+            # --------------
+            i_enable  = 1, # FIXME: Expose.
 
             # AXI Descriptor Input.
             # ---------------------
@@ -144,6 +153,32 @@ class AXICDMA(Module):
         # Add Sources.
         # ------------
         self.add_sources(platform)
+
+
+    def add_csr(self, address_width, len_width, tag_width):
+        self.read_addr			= CSRStorage(address_width)
+        self.write_addr			= CSRStorage(address_width)
+        self.len			= CSRStorage(len_width)
+        self.tag			= CSRStorage(tag_width)
+        self.valid			= CSRStorage(fields=[CSRField("valid", pulse=True)])
+        #self.dummy1			= CSRStorage(32, reset=0xBBBBBBBB)
+        self.ready		= CSRStatus()
+        self.status_tag	= CSRStatus(tag_width)
+        self.status_error	= CSRStatus(4)
+        self.status_valid	= CSRStatus()
+        #self.dummy2			= CSRStorage(32, reset=0xAAAAAAAA)
+        self.comb += [
+        	self.desc.read_addr.eq(self.read_addr.storage),
+        	self.desc.write_addr.eq(self.write_addr.storage),
+        	self.desc.len.eq(self.len.storage),
+        	self.desc.tag.eq(self.tag.storage),
+        	self.desc.valid.eq(self.valid.re),
+        	self.ready.status.eq(self.desc.ready),
+        	self.status_tag.status.eq(self.desc_status.tag),
+        	self.status_error.status.eq(self.desc_status.error),
+        	self.status_valid.status.eq(self.desc_status.valid),
+        	]
+
 
     @staticmethod
     def add_sources(platform):

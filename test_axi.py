@@ -4,6 +4,7 @@
 # This file is part of LiteX-Verilog-AXI-Test
 #
 # Copyright (c) 2022 Florent Kermarrec <florent@enjoy-digital.fr>
+# Copyright (c) 2022 Victor Suarez Rovere <suarezvictor@gmail.com>
 # SPDX-License-Identifier: BSD-2-Clause
 
 import argparse
@@ -80,7 +81,7 @@ class AXISimSoC(SoCCore):
             from verilog_axi.axi.axi_adapter import AXIAdapter
             s_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi)
+            #self.submodules.axi_adapter = AXIAdapter(platform, s_axi, m_axi) #brings verilator errors
 
             # AXI RAM.
             # --------
@@ -131,13 +132,14 @@ class AXISimSoC(SoCCore):
             # ---------
             from verilog_axi.axi.axi_cdma import AXICDMA
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules.axi_cdma = AXICDMA(platform, m_axi)
+            #self.submodules.axi_cdma = AXICDMA(platform, m_axi) #syntax check may add CSRs?
+
 
             # AXI DMA.
             # --------
             from verilog_axi.axi.axi_dma import AXIDMA
             m_axi = AXIInterface(data_width=32, address_width=32, id_width=8)
-            self.submodules.axi_dma = AXIDMA(platform, m_axi)
+            #self.submodules.axi_dma = AXIDMA(platform, m_axi) #syntax check may add CSRs?
 
         def axi_integration_test():
             # AXI Test Mapping.
@@ -148,6 +150,8 @@ class AXISimSoC(SoCCore):
                 "axi_dp_ram_b" : 0x012000,
                 "axi_ram_reg"  : 0x013000,
                 "axi_ram_fifo" : 0x014000,
+                "axi_dp_ram_1a": 0x015000,
+                "axi_dp_ram_2a": 0x016000,
                 "axi_ram_xbar" : 0x100000,
                 "axi_ram_int"  : 0x200000,
             }
@@ -283,6 +287,7 @@ class AXISimSoC(SoCCore):
             self.submodules += AXIRAM(platform, m_axi_1, size=0x1000)
             self.submodules += AXIRAM(platform, m_axi_2, size=0x1000)
             # 4) Debug.
+
             if 0:
                 for i, m_axi in enumerate([s_axi]):
                     self.submodules += AXIAWDebug(s_axi, name=f"S_AXI_{i}")
@@ -294,6 +299,78 @@ class AXISimSoC(SoCCore):
                     self.submodules += AXIWDebug(m_axi,  name=f"M_AXI_{i}")
                     self.submodules += AXIARDebug(m_axi, name=f"M_AXI_{i}")
                     self.submodules += AXIRDebug(m_axi,  name=f"M_AXI_{i}")
+                
+            # AXI CDMA & DMA
+            # ----------------
+            
+            #mem_write 0x15000 0x41 4			<-- sets some values in DPRAM1
+            #mem_read 0x15000 64				<-- dump original contents
+            #mem_write 0x16000 0x42 4			<-- sets some values in DPRAM2
+            #mem_read 0x16000 64				<-- dump original contents
+
+            #mem_write 0xf0000000 0				<-- source address
+            #mem_write 0xf0000004 0x20			<-- destination address
+            #mem_write 0xf0000008 0x10			<-- length (AXI format)
+            #mem_write 0xf0000010 1				<-- toogle VALID (starts when set to 1)
+            #mem_write 0xf0000010 0
+            #mem_read 0x15000 64				<-- dump updated contents
+
+            #mem_write 0xf0000800 0				<-- source address
+            #mem_write 0xf000081c 0x20			<-- destination address
+            #mem_write 0xf0000804 0x10			<-- length (AXI format)
+            #mem_write 0xf000080c 1				<-- toogle VALID (starts when set to 1)
+            #mem_write 0xf000080c 0
+            #mem_read 0x16000 64				<-- dump updated contents
+            
+            s_axi_1a = AXIInterface(data_width=32, address_width=32, id_width=1)
+            s_axi_1b = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.bus.add_slave("axi_dp_ram_1a", s_axi_1a, region=SoCRegion(origin=axi_map["axi_dp_ram_1a"], size=0x1000))
+            from verilog_axi.axi.axi_dp_ram import AXIDPRAM
+            self.submodules.dpram1 = AXIDPRAM(platform, s_axi_1a, s_axi_1b, size=0x1000, b_interleave=True)
+
+            from verilog_axi.axi.axi_cdma import AXICDMA
+            m_axi_cdma = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.submodules.axi_cdma = axi_cdma = AXICDMA(platform, m_axi_cdma, len_width=32)
+
+            if 0:
+                self.submodules += AXIAWDebug(m_axi_cdma, name="AXICDMA")
+                self.submodules += AXIWDebug(m_axi_cdma,  name="AXICDMA")
+                self.submodules += AXIARDebug(m_axi_cdma, name="AXICDMA")
+                self.submodules += AXIRDebug(m_axi_cdma,  name="AXICDMA")
+                self.submodules += AXIAWDebug(s_axi_1b, name="AXIDPRAM1_B")
+                self.submodules += AXIWDebug(s_axi_1b,  name="AXIDPRAM1_B")
+                self.submodules += AXIARDebug(s_axi_1b, name="AXIDPRAM1_B")
+                self.submodules += AXIRDebug(s_axi_1b,  name="AXIDPRAM1_B")
+
+            from verilog_axi.axi.axi_dma import AXIDMA
+            m_axi_dma = AXIInterface(data_width=32, address_width=32, id_width=8)
+            self.submodules.axi_dma = axi_dma = AXIDMA(platform, m_axi_dma, len_width=32)
+
+            s_axi_2a = AXIInterface(data_width=32, address_width=32, id_width=1)
+            s_axi_2b = AXIInterface(data_width=32, address_width=32, id_width=1)
+            self.bus.add_slave("axi_dp_ram_2a", s_axi_2a, region=SoCRegion(origin=axi_map["axi_dp_ram_2a"], size=0x1000))
+
+            from verilog_axi.axi.axi_dp_ram import AXIDPRAM
+            self.submodules.dpram2 = AXIDPRAM(platform, s_axi_2a, s_axi_2b, size=0x1000, b_interleave=True)
+
+            if 0:
+                self.submodules += AXIAWDebug(m_axi_dma, name="AXIDMA")
+                self.submodules += AXIWDebug(m_axi_dma,  name="AXIDMA")
+                self.submodules += AXIARDebug(m_axi_dma, name="AXIDMA")
+                self.submodules += AXIRDebug(m_axi_dma,  name="AXIDMA")
+                self.submodules += AXISWDebug(axi_dma.write_data, m_axi_dma.clock_domain, name="AXIDMA_WD")
+                self.submodules += AXISRDebug(axi_dma.read_data,  m_axi_dma.clock_domain, name="AXIDMA_RD")
+                self.submodules += AXIAWDebug(s_axi_2b, name="AXIDPRAM2_B")
+                self.submodules += AXIWDebug(s_axi_2b,  name="AXIDPRAM2_B")
+                self.submodules += AXIARDebug(s_axi_2b, name="AXIDPRAM2_B")
+                self.submodules += AXIRDebug(s_axi_2b,  name="AXIDPRAM2_B")
+
+            # CDMA & DMA interconnection (crossed read and write buses)
+            self.comb += axi_dma.read_data.connect(axi_dma.write_data) #interconect DMA output to input stream
+            self.comb += connect_axi_read(m_axi_cdma, s_axi_2b) #connect CDMA read port to DPRAM2 port B
+            self.comb += connect_axi_write(m_axi_cdma, s_axi_1b) #connect CDMA write pòrt to DPRAM1 port B
+            self.comb += connect_axi_read(m_axi_dma, s_axi_1b) #connect DMA read port to DPRAM1 port B
+            self.comb += connect_axi_write(m_axi_dma, s_axi_2b) #connect DMA write pòrt to DPRAM2 port B
 
         axi_syntax_test()
         axi_integration_test()
